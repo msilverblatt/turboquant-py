@@ -1,0 +1,141 @@
+{
+  "config": {
+    "model": "all-MiniLM-L6-v2",
+    "n_db": 2000,
+    "n_queries": 200,
+    "embed_dim": 384,
+    "bit_widths": [
+      2,
+      3,
+      4
+    ],
+    "top_ks": [
+      1,
+      5,
+      10
+    ],
+    "random_seed": 42
+  },
+  "rows": [
+    {
+      "method": "QJL",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 188025.14839092176,
+      "search_throughput_queries_per_sec": 788.8751500773649,
+      "mse": null,
+      "recall@1": 0.58,
+      "recall@5": 0.674,
+      "recall@10": 0.703
+    },
+    {
+      "method": "QJL",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 256784.73390427954,
+      "search_throughput_queries_per_sec": 665.4155014384447,
+      "mse": null,
+      "recall@1": 0.58,
+      "recall@5": 0.674,
+      "recall@10": 0.703
+    },
+    {
+      "method": "QJL",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 252032.00789796282,
+      "search_throughput_queries_per_sec": 734.4577269127752,
+      "mse": null,
+      "recall@1": 0.58,
+      "recall@5": 0.674,
+      "recall@10": 0.703
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 73253.5878023307,
+      "search_throughput_queries_per_sec": 131.8590575594258,
+      "mse": 0.0003047968029826914,
+      "recall@1": 0.755,
+      "recall@5": 0.807,
+      "recall@10": 0.8165
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 47648.78045583494,
+      "search_throughput_queries_per_sec": 126.34440986041064,
+      "mse": 8.958644400700862e-05,
+      "recall@1": 0.895,
+      "recall@5": 0.865,
+      "recall@10": 0.878
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 23039.815679212774,
+      "search_throughput_queries_per_sec": 136.03801475214485,
+      "mse": 2.4811799957569106e-05,
+      "recall@1": 0.895,
+      "recall@5": 0.905,
+      "recall@10": 0.9175
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 51134.329448618875,
+      "search_throughput_queries_per_sec": 114.36384655552203,
+      "mse": 0.0009459715018045849,
+      "recall@1": 0.605,
+      "recall@5": 0.673,
+      "recall@10": 0.7125
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 49192.425161840176,
+      "search_throughput_queries_per_sec": 111.50798400838492,
+      "mse": 0.0003047968029826914,
+      "recall@1": 0.76,
+      "recall@5": 0.81,
+      "recall@10": 0.82
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 48100.86713851053,
+      "search_throughput_queries_per_sec": 114.90585296664517,
+      "mse": 8.958644400700862e-05,
+      "recall@1": 0.895,
+      "recall@5": 0.862,
+      "recall@10": 0.881
+    },
+    {
+      "method": "NaiveUniform",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 679751.8886318549,
+      "search_throughput_queries_per_sec": 534.4489649076282,
+      "mse": 0.0010786692178814865,
+      "recall@1": 0.675,
+      "recall@5": 0.697,
+      "recall@10": 0.721
+    },
+    {
+      "method": "NaiveUniform",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 520268.75989623996,
+      "search_throughput_queries_per_sec": 536.8349891414786,
+      "mse": 0.0001945225157283917,
+      "recall@1": 0.83,
+      "recall@5": 0.822,
+      "recall@10": 0.85
+    },
+    {
+      "method": "NaiveUniform",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 532753.2702981356,
+      "search_throughput_queries_per_sec": 499.0431371810525,
+      "mse": 4.234774212780305e-05,
+      "recall@1": 0.895,
+      "recall@5": 0.897,
+      "recall@10": 0.9125
+    }
+  ]
+}
