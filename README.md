@@ -1,14 +1,18 @@
-# TurboQuant
+# turboquant-py
 
-**Vector quantization with near-optimal distortion rates.**
+**Python implementation of the TurboQuant and QJL vector quantization algorithms.**
 
-TurboQuant is a Python library implementing the TurboQuant and QJL vector quantization algorithms from Google Research (ICLR 2026 / AISTATS 2026). It compresses high-dimensional floating-point vectors to 1-4 bits per coordinate while preserving inner products and distances with provably near-optimal distortion. The library offers two quantization modes — MSE mode for reconstruction fidelity and inner-product mode for unbiased similarity search — plus a standalone 1-bit QJL quantizer, all built on a NumPy-first core with optional PyTorch acceleration.
+turboquant-py implements the TurboQuant and QJL vector quantization algorithms from Google Research (ICLR 2026 / AISTATS 2026). It compresses high-dimensional floating-point vectors to 1-4 bits per coordinate while preserving inner products and distances with provably near-optimal distortion. The library offers two quantization modes — MSE mode for reconstruction fidelity and inner-product mode for unbiased similarity search — plus a standalone 1-bit QJL quantizer, all built on a NumPy-first core with optional PyTorch acceleration.
 
 ## Installation
 
 ```bash
-pip install -e .
+pip install turboquant-py
 # With PyTorch acceleration (optional — supports CUDA and Apple Silicon MPS)
+pip install "turboquant-py[torch]"
+
+# From source
+pip install -e .
 pip install -e ".[torch]"
 ```
 

@@ -3,9 +3,9 @@ requires = ["setuptools>=68.0", "setuptools-scm>=8.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
-name = "turboquant"
+name = "turboquant-py"
 version = "0.1.0"
-description = "Vector quantization library implementing TurboQuant and QJL algorithms"
+description = "Python implementation of the TurboQuant and QJL vector quantization algorithms"
 requires-python = ">=3.10"
 dependencies = [
     "numpy>=1.24",
