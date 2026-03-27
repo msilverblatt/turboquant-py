@@ -8,7 +8,7 @@ TurboQuant is a Python library implementing the TurboQuant and QJL vector quanti
 
 ```bash
 pip install -e .
-# With PyTorch acceleration (optional)
+# With PyTorch acceleration (optional — supports CUDA and Apple Silicon MPS)
 pip install -e ".[torch]"
 ```
 
@@ -89,7 +89,7 @@ Multi-bit vector quantizer supporting MSE and inner-product modes.
 - `quantize(vectors)` — compress an `(n, dim)` array; returns `CompressedVectors`
 - `dequantize(compressed)` — reconstruct approximate originals; returns `(n, dim)` array
 - `inner_product(query, compressed)` — estimate inner products; returns `(n,)` scores
-- `quantize_batched(vectors, batch_size, output_path)` — stream-quantize large collections to disk
+- `quantize_batched(vectors, batch_size, output_path, entropy_encode)` — stream-quantize large collections to disk
 
 ---
 
@@ -115,7 +115,8 @@ In-memory container for quantized vectors. Holds the bit-packed quantization ind
 
 **Save/load:**
 ```python
-compressed.save("path/to/dir")          # writes indices.npy, norms.npy, meta.json
+compressed.save("path/to/dir")                          # bit-packed on disk
+compressed.save("path/to/dir", entropy_encode=True)     # Huffman-encoded (~5% smaller at 4-bit)
 loaded = CompressedVectors.load("path/to/dir")
 loaded = CompressedVectors.load("path/to/dir", mmap_mode="r")  # memory-mapped
 ```
@@ -126,12 +127,14 @@ loaded = CompressedVectors.load("path/to/dir", mmap_mode="r")  # memory-mapped
 
 ### `CompressedStore`
 
-On-disk vector store backed by memory-mapped arrays. Reconstructs the original quantizer from saved metadata and supports brute-force top-k search without loading all vectors into RAM.
+On-disk vector store backed by memory-mapped arrays. Reconstructs the original quantizer from saved metadata (using the stored seed to regenerate rotation/projection matrices) and supports brute-force top-k search without loading all vectors into RAM.
 
 ```python
 store = CompressedStore.load("path/to/dir")
-results = store.search(query, k=10)  # returns list[tuple[int, float]]
+results = store.search(query, k=10)  # returns list[tuple[int, float]], sorted descending by score
 ```
+
+Supports all modes: MSE, inner-product, QJL, and outlier configurations are all reconstructed automatically from the saved metadata.
 
 **Properties:** `dim`, `num_vectors`, `bit_width`, `mode`, `vectors`
 
@@ -141,7 +144,50 @@ results = store.search(query, k=10)  # returns list[tuple[int, float]]
 
 `compute_codebook` runs Lloyd-Max optimization on the Beta distribution that describes coordinates of randomly rotated unit vectors, returning `(centroids, boundaries)` arrays of sizes `2^bit_width` and `2^bit_width + 1`.
 
-`get_codebook` is an `lru_cache`-wrapped convenience wrapper around `compute_codebook`.
+`get_codebook` is an `lru_cache`-wrapped convenience wrapper around `compute_codebook`. Precomputed codebooks are shipped for common dimensions (64-4096); unsupported dimensions are computed on-the-fly.
+
+---
+
+### `compute_theoretical_savings(dim, bit_width)`
+
+Compute the theoretical entropy and Huffman coding savings for a given configuration, as described in Section 3.1 of the TurboQuant paper.
+
+```python
+from turboquant import compute_theoretical_savings
+savings = compute_theoretical_savings(dim=256, bit_width=4)
+# {'entropy': 3.742, 'avg_bits_huffman': 3.779, 'savings_pct': 5.5}
+```
+
+## Storage
+
+On-disk format uses a directory containing:
+
+| File | Contents |
+|------|----------|
+| `meta.json` | Dimensions, bit-width, mode, seed, outlier config, encoding flags |
+| `indices.npy` | Bit-packed quantization indices (or `indices.huffman` if entropy-encoded) |
+| `norms.npy` | Per-vector L2 norms |
+| `huffman_table.json` | Huffman coding table (only when entropy-encoded) |
+| Additional `.npy` files | QJL sign vectors, residual norms, outlier indices (mode-dependent) |
+
+Rotation and projection matrices are not stored — they are reconstructed deterministically from the saved seed, reducing storage overhead.
+
+### Entropy encoding
+
+Indices can optionally be Huffman-encoded when saving, providing lossless compression:
+
+| Bit-width | Shannon entropy | Huffman avg bits | Savings |
+|-----------|----------------|-----------------|---------|
+| 1 | 1.000 | 1.000 | 0.0% |
+| 2 | 1.911 | 1.989 | 0.5% |
+| 3 | 2.819 | 2.876 | 4.1% |
+| 4 | 3.742 | 3.779 | 5.5% |
+
+```python
+compressed.save("my_index", entropy_encode=True)
+# Loading is automatic — detects encoding from metadata
+loaded = CompressedVectors.load("my_index")
+```
 
 ## Supported Bit-Widths
 
@@ -185,6 +231,18 @@ TurboQuant-mse achieves 3.5x lower MSE than naive uniform quantization at 2 bits
 | TurboQuant-mse | 0.000304 | 0.44 | 0.95 |
 
 TurboQuant-mse reduces MSE by 2.8x over NaiveUniform and improves Recall@10 from 80% to 95% at the same 2-bit budget.
+
+## Acceleration
+
+All core operations are implemented in NumPy. When PyTorch is installed, matrix operations (rotation, projection, batch inner products) dispatch to PyTorch tensors automatically.
+
+| Backend | Device detection | Notes |
+|---------|-----------------|-------|
+| NumPy (default) | Always available | Fastest on CPU for most workloads |
+| PyTorch + CUDA | Auto-detected | Best for large-scale GPU workloads |
+| PyTorch + MPS | Auto-detected | Apple Silicon GPU; uses float32 internally (MPS does not support float64) |
+
+On CPU, NumPy and PyTorch perform similarly. GPU acceleration benefits primarily the matrix operations (rotation, projection); the scalar quantization is already vectorized in NumPy.
 
 ## How It Works
 
