@@ -61,8 +61,10 @@ class CompressedVectors:
 
     def __getitem__(self, key: slice) -> CompressedVectors:
         """Slice the compressed vectors."""
-        sliced_extras = {k: v[key] if v.shape[0] == self.num_vectors else v
-                         for k, v in self.extra_arrays.items()}
+        sliced_extras = {
+            k: v[key] if v.shape[0] == self.num_vectors else v
+            for k, v in self.extra_arrays.items()
+        }
         return CompressedVectors(
             indices=self.indices[key],
             norms=self.norms[key],

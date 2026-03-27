@@ -134,9 +134,7 @@ def compute_codebook(
 
 
 @lru_cache(maxsize=32)
-def get_codebook(
-    dim: int, bit_width: int
-) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
+def get_codebook(dim: int, bit_width: int) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
     """Get a codebook, computing it if not cached.
 
     Parameters

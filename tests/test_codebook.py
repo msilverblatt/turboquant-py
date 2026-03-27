@@ -113,5 +113,5 @@ class TestQuantizeDequantize:
             mses.append(np.mean((values - reconstructed) ** 2))
         for i in range(len(mses) - 1):
             assert mses[i] > mses[i + 1], (
-                f"MSE did not decrease: bw={i+1}={mses[i]}, bw={i+2}={mses[i+1]}"
+                f"MSE did not decrease: bw={i + 1}={mses[i]}, bw={i + 2}={mses[i + 1]}"
             )
