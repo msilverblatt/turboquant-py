@@ -361,6 +361,7 @@ class TurboQuant:
         vectors: Iterable[NDArray[np.float64]],
         batch_size: int = 10_000,
         output_path: str | Path = "index.tqz",
+        entropy_encode: bool = False,
     ) -> None:
         """Quantize vectors in batches, writing progressively to disk.
 
@@ -373,6 +374,9 @@ class TurboQuant:
             Included for API compatibility.
         output_path : str or Path
             Directory path for the output store.
+        entropy_encode : bool
+            If True, apply Huffman entropy encoding to the indices for
+            additional lossless compression.
         """
         output_path = Path(output_path)
         parts: list[CompressedVectors] = []
@@ -385,7 +389,7 @@ class TurboQuant:
             raise ValueError("No vectors provided to quantize_batched")
 
         merged = CompressedVectors.concatenate(parts)
-        merged.save(output_path)
+        merged.save(output_path, entropy_encode=entropy_encode)
         logger.info(
             "Batched quantization complete: %d vectors saved to %s",
             merged.num_vectors,

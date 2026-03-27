@@ -4,6 +4,7 @@ Implements the TurboQuant and QJL algorithms for compressing high-dimensional
 vectors while preserving inner products and distances.
 """
 
+from turboquant._entropy import compute_symbol_probabilities, compute_theoretical_savings
 from turboquant.codebook import compute_codebook, get_codebook
 from turboquant.exceptions import (
     DimensionMismatchError,
@@ -27,6 +28,8 @@ __all__ = [
     "TurboQuant",
     "TurboQuantError",
     "compute_codebook",
+    "compute_symbol_probabilities",
+    "compute_theoretical_savings",
     "get_codebook",
 ]
 

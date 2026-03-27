@@ -175,8 +175,8 @@ class CompressedVectors:
         pack_bw = max(self.bit_width, outlier_bw) if outlier_bw else self.bit_width
 
         if entropy_encode:
-            # Compute symbol probabilities and build Huffman table
-            probs = compute_symbol_probabilities(self.dim, self.bit_width)
+            # Use pack_bw to cover all possible index values (including outlier channels)
+            probs = compute_symbol_probabilities(self.dim, pack_bw)
             huffman_table = build_huffman_table(probs)
 
             # Encode indices
@@ -272,9 +272,7 @@ class CompressedVectors:
                 encoded_data = f.read()
 
             n_values = int(np.prod(indices_shape))
-            indices = huffman_decode(encoded_data, huffman_table, n_values).reshape(
-                indices_shape
-            )
+            indices = huffman_decode(encoded_data, huffman_table, n_values).reshape(indices_shape)
         else:
             raw = np.load(path / "indices.npy", mmap_mode=mmap_mode)
             if is_packed and indices_shape is not None:
