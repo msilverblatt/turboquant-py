@@ -100,3 +100,24 @@ class TestBatchQuantization:
         batched_reconstructed = tq.dequantize(batched_loaded)
 
         np.testing.assert_allclose(single_reconstructed, batched_reconstructed, atol=1e-10)
+
+    def test_batched_inner_product_mode(self, tmp_path: Path) -> None:
+        """quantize_batched should work with inner_product mode."""
+        dim = 64
+        rng = np.random.default_rng(42)
+        all_vectors = rng.standard_normal((100, dim))
+
+        tq = TurboQuant(dim=dim, bit_width=3, mode="inner_product", seed=42)
+
+        single_compressed = tq.quantize(all_vectors)
+        single_reconstructed = tq.dequantize(single_compressed)
+
+        def vector_iterator():
+            for i in range(0, 100, 25):
+                yield all_vectors[i : i + 25]
+
+        tq.quantize_batched(vector_iterator(), batch_size=25, output_path=tmp_path / "batched_ip")
+        batched_loaded = CompressedVectors.load(tmp_path / "batched_ip")
+        batched_reconstructed = tq.dequantize(batched_loaded)
+
+        np.testing.assert_allclose(single_reconstructed, batched_reconstructed, atol=1e-10)

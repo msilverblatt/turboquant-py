@@ -151,11 +151,11 @@ index.tqz/
 ├── meta.json           # dimensions, bit_width, mode, num_vectors, outlier config, seed
 ├── indices.npy         # bit-packed quantization indices (memory-mappable)
 ├── norms.npy           # per-vector L2 norms
-├── rotation.npy        # rotation matrix Π
-├── projection.npy      # QJL projection matrix S (if mode="inner_product" or QJL)
 ├── qjl_signs.npy       # QJL sign bits for residuals (if mode="inner_product")
 └── qjl_norms.npy       # residual norms (if mode="inner_product")
 ```
+
+Rotation and projection matrices are reconstructed deterministically from the stored seed rather than serialized, reducing storage overhead.
 
 All `.npy` files are memory-mappable via `np.load(..., mmap_mode='r')`.
 

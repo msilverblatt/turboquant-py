@@ -136,9 +136,13 @@ class CompressedVectors:
         path.mkdir(parents=True, exist_ok=True)
 
         indices_shape = self.indices.shape
-        if self.bit_width < 8:
+        # When outlier channels use a higher bit-width, pack at that width
+        # so outlier indices are not truncated.
+        outlier_bw = self.metadata.get("outlier_bit_width")
+        pack_bw = max(self.bit_width, outlier_bw) if outlier_bw else self.bit_width
+        if pack_bw < 8:
             flat = self.indices.ravel()
-            packed = pack_indices(flat, self.bit_width)
+            packed = pack_indices(flat, pack_bw)
         else:
             packed = self.indices
 
@@ -146,7 +150,8 @@ class CompressedVectors:
             "dim": self.dim,
             "bit_width": self.bit_width,
             "num_vectors": self.num_vectors,
-            "indices_packed": self.bit_width < 8,
+            "indices_packed": pack_bw < 8,
+            "indices_pack_width": pack_bw,
             "indices_shape": list(indices_shape),
             "extra_array_names": list(self.extra_arrays.keys()),
             **self.metadata,
@@ -198,6 +203,7 @@ class CompressedVectors:
         bit_width = meta.pop("bit_width")
         meta.pop("num_vectors", None)
         is_packed = meta.pop("indices_packed", False)
+        pack_bw = meta.pop("indices_pack_width", bit_width)
         indices_shape = meta.pop("indices_shape", None)
         extra_names = meta.pop("extra_array_names", [])
 
@@ -206,7 +212,7 @@ class CompressedVectors:
             n_values = int(np.prod(indices_shape))
             # mmap arrays are read-only; make a writable copy for unpack
             raw_arr = np.array(raw)
-            indices = unpack_indices(raw_arr, bit_width, n_values).reshape(indices_shape)
+            indices = unpack_indices(raw_arr, pack_bw, n_values).reshape(indices_shape)
         else:
             indices = np.array(raw) if mmap_mode else raw
         norms = np.load(path / "norms.npy", mmap_mode=mmap_mode)
@@ -301,11 +307,11 @@ class CompressedStore:
                 bit_width=self._vectors.bit_width,
                 mode=mode,
                 seed=seed,
+                outlier_channels=meta.get("outlier_channels", 0),
+                outlier_bit_width=meta.get("outlier_bit_width"),
             )
 
-        raise StorageError(
-            f"Cannot reconstruct quantizer for unknown mode: {mode!r}"
-        )
+        raise StorageError(f"Cannot reconstruct quantizer for unknown mode: {mode!r}")
 
     def search(
         self,

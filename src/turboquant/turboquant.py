@@ -146,7 +146,12 @@ class TurboQuant:
 
         n = rotated.shape[0]
         extra_arrays: dict[str, NDArray] = {}
-        metadata: dict[str, object] = {"mode": self._mode, "seed": self._seed}
+        metadata: dict[str, object] = {
+            "mode": self._mode,
+            "seed": self._seed,
+            "outlier_channels": self._outlier_channels,
+            "outlier_bit_width": self._outlier_bit_width,
+        }
 
         if self._outlier_channels > 0 and self._outlier_bit_width is not None:
             # Detect outlier channels by average magnitude across the batch
@@ -158,24 +163,21 @@ class TurboQuant:
             inlier_indices = all_indices[inlier_mask]
 
             # Codebooks for inlier and outlier channels
-            _centroids_in, boundaries_in = get_codebook(self._dim, bit_width)
-            _centroids_out, boundaries_out = get_codebook(self._dim, self._outlier_bit_width)
+            _, boundaries_in = get_codebook(self._dim, bit_width)
+            _, boundaries_out = get_codebook(self._dim, self._outlier_bit_width)
 
             # Quantize all channels; outlier channels use higher bit-width codebook
             indices = np.empty((n, self._dim), dtype=np.uint8)
-            indices[:, inlier_indices] = quantize_scalar(
-                rotated[:, inlier_indices], boundaries_in
-            )
+            indices[:, inlier_indices] = quantize_scalar(rotated[:, inlier_indices], boundaries_in)
             indices[:, outlier_indices] = quantize_scalar(
                 rotated[:, outlier_indices], boundaries_out
             )
 
             extra_arrays["outlier_indices"] = outlier_indices.astype(np.int64)
             extra_arrays["inlier_indices"] = inlier_indices.astype(np.int64)
-            metadata["outlier_bit_width"] = self._outlier_bit_width
         else:
             # Standard path: all channels use the same codebook
-            _centroids, boundaries = get_codebook(self._dim, bit_width)
+            _, boundaries = get_codebook(self._dim, bit_width)
             indices = quantize_scalar(rotated, boundaries)
 
         return CompressedVectors(
