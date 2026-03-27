@@ -114,15 +114,33 @@ class CompressedVectors:
             dim=ref.dim,
             bit_width=ref.bit_width,
             metadata=ref.metadata.copy(),
-            extra_arrays={
-                k: np.concatenate(
-                    [p.extra_arrays[k] for p in parts if k in p.extra_arrays], axis=0
-                )
-                for k in ref.extra_arrays
-                if all(k in p.extra_arrays for p in parts)
-                and ref.extra_arrays[k].shape[0] == ref.num_vectors
-            },
+            extra_arrays=cls._merge_extra_arrays(parts),
         )
+
+    @classmethod
+    def _merge_extra_arrays(
+        cls, parts: list[CompressedVectors]
+    ) -> dict[str, NDArray]:
+        """Merge extra_arrays from multiple CompressedVectors.
+
+        Per-vector arrays (shape[0] == num_vectors) are concatenated.
+        Shared arrays (e.g. outlier_indices) are taken from the first part.
+        """
+        if not parts:
+            return {}
+        ref = parts[0]
+        merged: dict[str, NDArray] = {}
+        for k in ref.extra_arrays:
+            if not all(k in p.extra_arrays for p in parts):
+                continue
+            if ref.extra_arrays[k].shape[0] == ref.num_vectors:
+                merged[k] = np.concatenate(
+                    [p.extra_arrays[k] for p in parts], axis=0
+                )
+            else:
+                # Shared array (same across all parts) — take from first
+                merged[k] = ref.extra_arrays[k].copy()
+        return merged
 
     def save(self, path: str | Path) -> None:
         """Save to a directory on disk.

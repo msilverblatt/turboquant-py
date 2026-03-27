@@ -76,6 +76,8 @@ class TurboQuant:
         self._seed = seed
         self._outlier_channels = outlier_channels
         self._outlier_bit_width = outlier_bit_width
+        self._outlier_indices: NDArray[np.int64] | None = None
+        self._inlier_indices: NDArray[np.int64] | None = None
 
         # Generate random rotation matrix
         self._rotation = generate_orthogonal_matrix(dim, seed=seed)
@@ -154,13 +156,20 @@ class TurboQuant:
         }
 
         if self._outlier_channels > 0 and self._outlier_bit_width is not None:
-            # Detect outlier channels by average magnitude across the batch
-            avg_magnitude = np.mean(np.abs(rotated), axis=0)
-            outlier_indices = np.argsort(avg_magnitude)[-self._outlier_channels :]
-            all_indices = np.arange(self._dim)
-            inlier_mask = np.ones(self._dim, dtype=bool)
-            inlier_mask[outlier_indices] = False
-            inlier_indices = all_indices[inlier_mask]
+            # Use cached outlier indices if available (ensures consistency across batches),
+            # otherwise detect from this batch and cache for future calls.
+            if self._outlier_indices is None:
+                avg_magnitude = np.mean(np.abs(rotated), axis=0)
+                self._outlier_indices = np.sort(
+                    np.argsort(avg_magnitude)[-self._outlier_channels:]
+                ).astype(np.int64)
+                all_indices = np.arange(self._dim)
+                inlier_mask = np.ones(self._dim, dtype=bool)
+                inlier_mask[self._outlier_indices] = False
+                self._inlier_indices = all_indices[inlier_mask].astype(np.int64)
+
+            outlier_indices = self._outlier_indices
+            inlier_indices = self._inlier_indices
 
             # Codebooks for inlier and outlier channels
             _, boundaries_in = get_codebook(self._dim, bit_width)
