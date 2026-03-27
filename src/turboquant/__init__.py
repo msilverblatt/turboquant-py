@@ -12,8 +12,11 @@ from turboquant.exceptions import (
     StorageError,
     TurboQuantError,
 )
+from turboquant.storage import CompressedVectors, CompressedStore
 
 __all__ = [
+    "CompressedStore",
+    "CompressedVectors",
     "DimensionMismatchError",
     "InvalidBitWidthError",
     "InvalidModeError",
