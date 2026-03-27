@@ -14,6 +14,7 @@ from turboquant.exceptions import (
 )
 from turboquant.qjl import QJL
 from turboquant.storage import CompressedStore, CompressedVectors
+from turboquant.turboquant import TurboQuant
 
 __all__ = [
     "QJL",
@@ -23,6 +24,7 @@ __all__ = [
     "InvalidBitWidthError",
     "InvalidModeError",
     "StorageError",
+    "TurboQuant",
     "TurboQuantError",
     "compute_codebook",
     "get_codebook",
