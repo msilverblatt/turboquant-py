@@ -1,0 +1,110 @@
+{
+  "config": {
+    "n_db": 2000,
+    "n_queries": 200,
+    "embed_dim": 384,
+    "bit_widths": [
+      2,
+      3,
+      4
+    ],
+    "top_ks": [
+      1,
+      5,
+      10
+    ],
+    "random_seed": 42
+  },
+  "rows": [
+    {
+      "method": "QJL",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 224037.34811883286,
+      "search_throughput_queries_per_sec": 1605.2958710376247,
+      "mse": null,
+      "recall@1": 0.63,
+      "recall@5": 0.639,
+      "recall@10": 0.649
+    },
+    {
+      "method": "QJL",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 240213.78048299206,
+      "search_throughput_queries_per_sec": 1607.6895792287153,
+      "mse": null,
+      "recall@1": 0.63,
+      "recall@5": 0.639,
+      "recall@10": 0.649
+    },
+    {
+      "method": "QJL",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 253375.72439802886,
+      "search_throughput_queries_per_sec": 1788.439516286533,
+      "mse": null,
+      "recall@1": 0.63,
+      "recall@5": 0.639,
+      "recall@10": 0.649
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 81007.73624526158,
+      "search_throughput_queries_per_sec": 167.4587290116418,
+      "mse": 0.000295559610173346,
+      "recall@1": 0.85,
+      "recall@5": 0.81,
+      "recall@10": 0.808
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 53348.033211168884,
+      "search_throughput_queries_per_sec": 163.4919649765059,
+      "mse": 8.67011539538832e-05,
+      "recall@1": 0.91,
+      "recall@5": 0.875,
+      "recall@10": 0.8965
+    },
+    {
+      "method": "TurboQuant-mse",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 21079.76723263414,
+      "search_throughput_queries_per_sec": 166.69619147914884,
+      "mse": 2.3969842075941752e-05,
+      "recall@1": 0.97,
+      "recall@5": 0.935,
+      "recall@10": 0.9345
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 2,
+      "quant_throughput_vecs_per_sec": 58192.8930295845,
+      "search_throughput_queries_per_sec": 152.94303510552047,
+      "mse": 0.0009170451978209798,
+      "recall@1": 0.69,
+      "recall@5": 0.676,
+      "recall@10": 0.677
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 3,
+      "quant_throughput_vecs_per_sec": 55962.253469040654,
+      "search_throughput_queries_per_sec": 154.30478029567087,
+      "mse": 0.000295559610173346,
+      "recall@1": 0.865,
+      "recall@5": 0.818,
+      "recall@10": 0.819
+    },
+    {
+      "method": "TurboQuant-inner_product",
+      "bit_width": 4,
+      "quant_throughput_vecs_per_sec": 51563.446235555006,
+      "search_throughput_queries_per_sec": 154.4340078463294,
+      "mse": 8.67011539538832e-05,
+      "recall@1": 0.92,
+      "recall@5": 0.878,
+      "recall@10": 0.9005
+    }
+  ]
+}
