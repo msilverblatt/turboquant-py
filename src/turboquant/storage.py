@@ -175,20 +175,48 @@ class CompressedVectors:
         pack_bw = max(self.bit_width, outlier_bw) if outlier_bw else self.bit_width
 
         if entropy_encode:
-            # Use pack_bw to cover all possible index values (including outlier channels)
-            probs = compute_symbol_probabilities(self.dim, pack_bw)
-            huffman_table = build_huffman_table(probs)
+            outlier_indices = self.extra_arrays.get("outlier_indices")
+            has_outliers = outlier_indices is not None and outlier_bw is not None
 
-            # Encode indices
-            encoded_data = huffman_encode(self.indices.ravel(), huffman_table)
+            if has_outliers:
+                # Split encoding: separate Huffman tables for inlier and outlier channels
+                inlier_indices_arr = self.extra_arrays["inlier_indices"]
+                inlier_probs = compute_symbol_probabilities(self.dim, self.bit_width)
+                outlier_probs = compute_symbol_probabilities(self.dim, outlier_bw)
+                inlier_table = build_huffman_table(inlier_probs)
+                outlier_table = build_huffman_table(outlier_probs)
 
-            # Write encoded indices as raw bytes
-            with open(path / "indices.huffman", "wb") as f:
-                f.write(encoded_data)
+                inlier_data = huffman_encode(
+                    self.indices[:, inlier_indices_arr].ravel(), inlier_table
+                )
+                outlier_data = huffman_encode(
+                    self.indices[:, outlier_indices].ravel(), outlier_table
+                )
 
-            # Write Huffman table
-            with open(path / "huffman_table.json", "w") as f:
-                json.dump(table_to_serializable(huffman_table), f, indent=2)
+                with open(path / "indices_inlier.huffman", "wb") as f:
+                    f.write(inlier_data)
+                with open(path / "indices_outlier.huffman", "wb") as f:
+                    f.write(outlier_data)
+                with open(path / "huffman_table.json", "w") as f:
+                    json.dump(
+                        {
+                            "inlier": table_to_serializable(inlier_table),
+                            "outlier": table_to_serializable(outlier_table),
+                            "split": True,
+                        },
+                        f,
+                        indent=2,
+                    )
+            else:
+                # Single table for all channels
+                probs = compute_symbol_probabilities(self.dim, self.bit_width)
+                huffman_table = build_huffman_table(probs)
+                encoded_data = huffman_encode(self.indices.ravel(), huffman_table)
+
+                with open(path / "indices.huffman", "wb") as f:
+                    f.write(encoded_data)
+                with open(path / "huffman_table.json", "w") as f:
+                    json.dump(table_to_serializable(huffman_table), f, indent=2)
         else:
             if pack_bw < 8:
                 flat = self.indices.ravel()
@@ -266,13 +294,41 @@ class CompressedVectors:
             if not huffman_path.exists():
                 raise StorageError(f"Missing huffman_table.json in {path}")
             with open(huffman_path) as f:
-                huffman_table = table_from_serializable(json.load(f))
+                huffman_raw = json.load(f)
 
-            with open(path / "indices.huffman", "rb") as f:
-                encoded_data = f.read()
+            n, d = indices_shape
+            if isinstance(huffman_raw, dict) and huffman_raw.get("split"):
+                # Split encoding: separate tables for inlier and outlier channels
+                inlier_table = table_from_serializable(huffman_raw["inlier"])
+                outlier_table = table_from_serializable(huffman_raw["outlier"])
 
-            n_values = int(np.prod(indices_shape))
-            indices = huffman_decode(encoded_data, huffman_table, n_values).reshape(indices_shape)
+                # We need outlier/inlier indices from extra_arrays (loaded below),
+                # but we also stored them in meta. Load them from the .npy files now.
+                outlier_idx = np.load(path / "outlier_indices.npy")
+                inlier_idx = np.load(path / "inlier_indices.npy")
+
+                with open(path / "indices_inlier.huffman", "rb") as f:
+                    inlier_data = f.read()
+                with open(path / "indices_outlier.huffman", "rb") as f:
+                    outlier_data = f.read()
+
+                n_inlier = n * len(inlier_idx)
+                n_outlier = n * len(outlier_idx)
+                inlier_vals = huffman_decode(inlier_data, inlier_table, n_inlier)
+                outlier_vals = huffman_decode(outlier_data, outlier_table, n_outlier)
+
+                indices = np.empty((n, d), dtype=np.uint8)
+                indices[:, inlier_idx] = inlier_vals.reshape(n, len(inlier_idx))
+                indices[:, outlier_idx] = outlier_vals.reshape(n, len(outlier_idx))
+            else:
+                # Single table
+                huffman_table = table_from_serializable(huffman_raw)
+                with open(path / "indices.huffman", "rb") as f:
+                    encoded_data = f.read()
+                n_values = int(np.prod(indices_shape))
+                indices = huffman_decode(
+                    encoded_data, huffman_table, n_values
+                ).reshape(indices_shape)
         else:
             raw = np.load(path / "indices.npy", mmap_mode=mmap_mode)
             if is_packed and indices_shape is not None:

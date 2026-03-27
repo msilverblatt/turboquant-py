@@ -239,6 +239,39 @@ class TestEntropyWithModes:
         np.testing.assert_array_equal(loaded.indices, compressed.indices)
 
 
+    def test_outlier_split_encoding_uses_separate_files(self, tmp_path: Path) -> None:
+        from turboquant.turboquant import TurboQuant
+
+        dim = 128
+        rng = np.random.default_rng(42)
+        vectors = rng.standard_normal((50, dim))
+        vectors[:, :4] *= 10.0
+
+        tq = TurboQuant(
+            dim=dim,
+            bit_width=2,
+            mode="mse",
+            seed=42,
+            outlier_channels=4,
+            outlier_bit_width=4,
+        )
+        compressed = tq.quantize(vectors)
+        query = rng.standard_normal(dim)
+        scores_before = tq.inner_product(query, compressed)
+
+        compressed.save(tmp_path / "split_entropy", entropy_encode=True)
+
+        # Verify split files exist
+        assert (tmp_path / "split_entropy" / "indices_inlier.huffman").exists()
+        assert (tmp_path / "split_entropy" / "indices_outlier.huffman").exists()
+        assert not (tmp_path / "split_entropy" / "indices.huffman").exists()
+
+        # Verify round-trip scores match
+        loaded = CompressedVectors.load(tmp_path / "split_entropy")
+        scores_after = tq.inner_product(query, loaded)
+        np.testing.assert_allclose(scores_before, scores_after, atol=1e-10)
+
+
 class TestTheoreticalSavings:
     @pytest.mark.parametrize("bit_width", [1, 2, 3, 4])
     def test_entropy_less_than_bit_width(self, bit_width: int) -> None:
