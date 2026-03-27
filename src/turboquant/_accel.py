@@ -38,6 +38,25 @@ def has_torch() -> bool:
         return False
 
 
+@lru_cache(maxsize=1)
+def _get_torch_device() -> str:
+    """Detect the best available PyTorch device.
+
+    Returns
+    -------
+    str
+        "mps" if Apple Silicon GPU is available, "cuda" if NVIDIA GPU
+        is available, otherwise "cpu".
+    """
+    import torch
+
+    if torch.backends.mps.is_available():
+        return "mps"
+    if torch.cuda.is_available():
+        return "cuda"
+    return "cpu"
+
+
 def generate_orthogonal_matrix(dim: int, seed: int | None = None) -> NDArray[np.float64]:
     """Generate a random orthogonal matrix via QR decomposition.
 
@@ -108,10 +127,20 @@ def matmul(a: NDArray, b: NDArray) -> NDArray:
     if has_torch():
         import torch
 
-        device = "cpu"
-        ta = torch.from_numpy(np.ascontiguousarray(a)).to(device)
-        tb = torch.from_numpy(np.ascontiguousarray(b)).to(device)
-        result = torch.matmul(ta, tb)
+        device = _get_torch_device()
+        # MPS does not support float64 — compute in float32, return in original dtype
+        use_f32 = device == "mps"
+        dtype = torch.float32 if use_f32 else None
+        ta = torch.from_numpy(np.ascontiguousarray(a))
+        tb = torch.from_numpy(np.ascontiguousarray(b))
+        if dtype is not None:
+            ta = ta.to(dtype)
+            tb = tb.to(dtype)
+        ta = ta.to(device)
+        tb = tb.to(device)
+        result = torch.matmul(ta, tb).cpu()
+        if use_f32:
+            result = result.to(torch.float64)
         return result.numpy()
     return a @ b
 
@@ -134,9 +163,18 @@ def batch_inner_product(query: NDArray, vectors: NDArray) -> NDArray[np.float64]
     if has_torch():
         import torch
 
-        device = "cpu"
-        tq = torch.from_numpy(np.ascontiguousarray(query)).to(device)
-        tv = torch.from_numpy(np.ascontiguousarray(vectors)).to(device)
-        result = torch.mv(tv, tq)
+        device = _get_torch_device()
+        use_f32 = device == "mps"
+        dtype = torch.float32 if use_f32 else None
+        tq = torch.from_numpy(np.ascontiguousarray(query))
+        tv = torch.from_numpy(np.ascontiguousarray(vectors))
+        if dtype is not None:
+            tq = tq.to(dtype)
+            tv = tv.to(dtype)
+        tq = tq.to(device)
+        tv = tv.to(device)
+        result = torch.mv(tv, tq).cpu()
+        if use_f32:
+            result = result.to(torch.float64)
         return result.numpy()
     return vectors @ query

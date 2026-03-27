@@ -54,14 +54,14 @@ class TestMatmul:
         A = rng.standard_normal((32, 64))
         x = rng.standard_normal(64)
         result = matmul(A, x)
-        np.testing.assert_allclose(result, A @ x)
+        np.testing.assert_allclose(result, A @ x, atol=1e-5)
 
     def test_matrix_matrix(self) -> None:
         rng = np.random.default_rng(42)
         A = rng.standard_normal((32, 64))
         B = rng.standard_normal((64, 10))
         result = matmul(A, B)
-        np.testing.assert_allclose(result, A @ B)
+        np.testing.assert_allclose(result, A @ B, atol=1e-5)
 
 
 class TestBatchInnerProduct:
@@ -71,7 +71,7 @@ class TestBatchInnerProduct:
         vectors = rng.standard_normal((100, 64))
         result = batch_inner_product(query, vectors)
         expected = vectors @ query
-        np.testing.assert_allclose(result, expected)
+        np.testing.assert_allclose(result, expected, atol=1e-5)
 
     def test_output_shape(self) -> None:
         rng = np.random.default_rng(42)
