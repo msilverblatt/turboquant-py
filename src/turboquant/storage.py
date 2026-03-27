@@ -118,9 +118,7 @@ class CompressedVectors:
         )
 
     @classmethod
-    def _merge_extra_arrays(
-        cls, parts: list[CompressedVectors]
-    ) -> dict[str, NDArray]:
+    def _merge_extra_arrays(cls, parts: list[CompressedVectors]) -> dict[str, NDArray]:
         """Merge extra_arrays from multiple CompressedVectors.
 
         Per-vector arrays (shape[0] == num_vectors) are concatenated.
@@ -134,11 +132,14 @@ class CompressedVectors:
             if not all(k in p.extra_arrays for p in parts):
                 continue
             if ref.extra_arrays[k].shape[0] == ref.num_vectors:
-                merged[k] = np.concatenate(
-                    [p.extra_arrays[k] for p in parts], axis=0
-                )
+                merged[k] = np.concatenate([p.extra_arrays[k] for p in parts], axis=0)
             else:
-                # Shared array (same across all parts) — take from first
+                # Shared array (same across all parts) — validate consistency
+                for i, p in enumerate(parts[1:], 1):
+                    if not np.array_equal(p.extra_arrays[k], ref.extra_arrays[k]):
+                        raise ValueError(
+                            f"Shared extra array '{k}' differs between parts 0 and {i}"
+                        )
                 merged[k] = ref.extra_arrays[k].copy()
         return merged
 
@@ -164,7 +165,9 @@ class CompressedVectors:
         else:
             packed = self.indices
 
+        # User metadata goes first so reserved keys always win
         meta = {
+            **self.metadata,
             "dim": self.dim,
             "bit_width": self.bit_width,
             "num_vectors": self.num_vectors,
@@ -172,7 +175,6 @@ class CompressedVectors:
             "indices_pack_width": pack_bw,
             "indices_shape": list(indices_shape),
             "extra_array_names": list(self.extra_arrays.keys()),
-            **self.metadata,
         }
         with open(path / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)

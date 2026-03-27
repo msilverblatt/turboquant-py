@@ -49,6 +49,8 @@ class QJL:
     ) -> None:
         self._dim = dim
         self._projection_dim = projection_dim if projection_dim is not None else dim
+        if self._projection_dim > dim:
+            raise ValueError(f"projection_dim ({self._projection_dim}) cannot exceed dim ({dim})")
         self._seed = seed
         self._projection = generate_projection_matrix(
             rows=self._projection_dim, cols=dim, seed=seed

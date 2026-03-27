@@ -48,6 +48,9 @@ def _get_torch_device() -> str:
         "mps" if Apple Silicon GPU is available, "cuda" if NVIDIA GPU
         is available, otherwise "cpu".
     """
+    if not has_torch():
+        return "cpu"
+
     import torch
 
     if torch.backends.mps.is_available():

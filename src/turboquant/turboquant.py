@@ -161,7 +161,7 @@ class TurboQuant:
             if self._outlier_indices is None:
                 avg_magnitude = np.mean(np.abs(rotated), axis=0)
                 self._outlier_indices = np.sort(
-                    np.argsort(avg_magnitude)[-self._outlier_channels:]
+                    np.argsort(avg_magnitude)[-self._outlier_channels :]
                 ).astype(np.int64)
                 all_indices = np.arange(self._dim)
                 inlier_mask = np.ones(self._dim, dtype=bool)

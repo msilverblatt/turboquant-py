@@ -130,9 +130,7 @@ class TestSaveLoadScoreEquivalence:
 
         np.testing.assert_allclose(scores_before, scores_after, atol=1e-10)
 
-    def test_turboquant_mse_outlier_scores_exact_after_save_load(
-        self, tmp_path: Path
-    ) -> None:
+    def test_turboquant_mse_outlier_scores_exact_after_save_load(self, tmp_path: Path) -> None:
         rng = np.random.default_rng(SEED)
         vectors = _make_outlier_vectors(rng, N_VECTORS, DIM)
         query = _make_query(rng, DIM)
@@ -154,9 +152,7 @@ class TestSaveLoadScoreEquivalence:
 
         np.testing.assert_allclose(scores_before, scores_after, atol=1e-10)
 
-    def test_turboquant_ip_outlier_scores_exact_after_save_load(
-        self, tmp_path: Path
-    ) -> None:
+    def test_turboquant_ip_outlier_scores_exact_after_save_load(self, tmp_path: Path) -> None:
         rng = np.random.default_rng(SEED)
         vectors = _make_outlier_vectors(rng, N_VECTORS, DIM)
         query = _make_query(rng, DIM)
@@ -276,9 +272,7 @@ class TestBitPackingIntegrity:
     """Dequantized results must be identical before save vs after load."""
 
     @pytest.mark.parametrize("bit_width", [1, 2, 3, 4])
-    def test_dequantize_identical_after_save_load(
-        self, tmp_path: Path, bit_width: int
-    ) -> None:
+    def test_dequantize_identical_after_save_load(self, tmp_path: Path, bit_width: int) -> None:
         rng = np.random.default_rng(SEED)
         vectors = _make_vectors(rng, N_VECTORS, DIM)
 
@@ -326,9 +320,7 @@ class TestBitPackingIntegrity:
         deq_before = tq.dequantize(compressed)
 
         compressed.save(tmp_path / f"outlier_bw{bit_width}_obw{outlier_bit_width}")
-        loaded = CompressedVectors.load(
-            tmp_path / f"outlier_bw{bit_width}_obw{outlier_bit_width}"
-        )
+        loaded = CompressedVectors.load(tmp_path / f"outlier_bw{bit_width}_obw{outlier_bit_width}")
         deq_after = tq.dequantize(loaded)
 
         np.testing.assert_array_equal(
@@ -341,9 +333,7 @@ class TestBitPackingIntegrity:
         )
 
     @pytest.mark.parametrize("bit_width", [1, 2, 3, 4])
-    def test_raw_indices_survive_pack_unpack(
-        self, tmp_path: Path, bit_width: int
-    ) -> None:
+    def test_raw_indices_survive_pack_unpack(self, tmp_path: Path, bit_width: int) -> None:
         """Raw indices must be identical after pack/save/load/unpack."""
         rng = np.random.default_rng(SEED)
         vectors = _make_vectors(rng, N_VECTORS, DIM)
@@ -428,9 +418,7 @@ class TestQuantizeBatchedEquivalence:
     """Batched quantization must produce identical results to single-shot."""
 
     @pytest.mark.parametrize("mode", ["mse", "inner_product"])
-    def test_batched_dequantize_matches_single(
-        self, tmp_path: Path, mode: str
-    ) -> None:
+    def test_batched_dequantize_matches_single(self, tmp_path: Path, mode: str) -> None:
         bit_width = 3 if mode == "inner_product" else 2
         rng = np.random.default_rng(SEED)
         vectors = _make_vectors(rng, 80, DIM)
@@ -493,9 +481,7 @@ class TestQuantizeBatchedEquivalence:
             for i in range(0, 80, 20):
                 yield vectors[i : i + 20]
 
-        tq.quantize_batched(
-            batch_iter(), output_path=tmp_path / f"batched_scores_{mode}"
-        )
+        tq.quantize_batched(batch_iter(), output_path=tmp_path / f"batched_scores_{mode}")
         batched_loaded = CompressedVectors.load(tmp_path / f"batched_scores_{mode}")
         batched_scores = tq.inner_product(query, batched_loaded)
 
