@@ -98,12 +98,12 @@ class QJL:
         signs[signs == 0] = 1
 
         return CompressedVectors(
-            indices=np.zeros((len(vectors), self._dim), dtype=np.uint8),
+            indices=np.empty((len(vectors), 0), dtype=np.uint8),
             norms=norms,
             dim=self._dim,
             bit_width=1,
             metadata={"mode": "qjl", "projection_dim": self._projection_dim, "seed": self._seed},
-            extra_arrays={"signs": signs, "projection": self._projection},
+            extra_arrays={"signs": signs},
         )
 
     def inner_product(
