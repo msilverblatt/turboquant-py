@@ -80,7 +80,6 @@ class TestCompressedVectors:
             loaded.extra_arrays["qjl_signs"], cv.extra_arrays["qjl_signs"]
         )
 
-
     def test_packed_saves_disk_space(self, tmp_path: Path) -> None:
         """Verify that bit-packing at 2-bit width yields ~4x smaller indices on disk."""
         n, dim, bit_width = 1000, 256, 2
