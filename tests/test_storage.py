@@ -81,6 +81,39 @@ class TestCompressedVectors:
         )
 
 
+    def test_packed_saves_disk_space(self, tmp_path: Path) -> None:
+        """Verify that bit-packing at 2-bit width yields ~4x smaller indices on disk."""
+        n, dim, bit_width = 1000, 256, 2
+        rng = np.random.default_rng(42)
+        max_val = (1 << bit_width) - 1
+        indices = rng.integers(0, max_val + 1, size=(n, dim), dtype=np.uint8)
+        norms = rng.random(n).astype(np.float64) + 0.5
+        cv = CompressedVectors(
+            indices=indices,
+            norms=norms,
+            dim=dim,
+            bit_width=bit_width,
+            metadata={"mode": "mse"},
+        )
+
+        save_path = tmp_path / "packed"
+        cv.save(save_path)
+
+        packed_size = (save_path / "indices.npy").stat().st_size
+        # Raw uint8 would be n * dim = 256000 bytes (plus npy header ~128 bytes).
+        # Packed at 2-bit should be n * dim * 2 / 8 = 64000 bytes (plus header).
+        unpacked_data_size = n * dim  # 256000
+        # Allow generous margin: packed file should be less than half the raw data size
+        assert packed_size < unpacked_data_size * 0.5, (
+            f"Packed file ({packed_size} bytes) should be much smaller than "
+            f"raw data ({unpacked_data_size} bytes)"
+        )
+
+        # Verify round-trip correctness
+        loaded = CompressedVectors.load(save_path)
+        np.testing.assert_array_equal(loaded.indices, cv.indices)
+
+
 class TestCompressedStoreSearch:
     def test_search_returns_top_k(self, tmp_path: Path) -> None:
         from turboquant.turboquant import TurboQuant
@@ -111,3 +144,76 @@ class TestCompressedStoreSearch:
         store = CompressedStore.load(tmp_path / "store")
         assert store.bit_width == 2
         assert store.mode == "mse"
+
+    def test_search_returns_correct_top_k(self, tmp_path: Path) -> None:
+        from turboquant.turboquant import TurboQuant
+
+        dim = 64
+        n = 50
+        rng = np.random.default_rng(0)
+        vectors = rng.standard_normal((n, dim))
+
+        tq = TurboQuant(dim=dim, bit_width=3, mode="mse", seed=7)
+        compressed = tq.quantize(vectors)
+        compressed.save(tmp_path / "store")
+
+        store = CompressedStore.load(tmp_path / "store")
+
+        # Use first vector as query; it should score highest against itself
+        query = vectors[0]
+        k = 5
+        results = store.search(query, k=k)
+
+        assert len(results) == k
+        # Results must be sorted descending by score
+        scores = [score for _, score in results]
+        assert scores == sorted(scores, reverse=True)
+        # The index of the query vector itself should appear in top results
+        returned_indices = [idx for idx, _ in results]
+        assert 0 in returned_indices
+
+    def test_search_qjl_mode(self, tmp_path: Path) -> None:
+        from turboquant.qjl import QJL
+
+        dim = 64
+        n = 50
+        rng = np.random.default_rng(1)
+        vectors = rng.standard_normal((n, dim))
+
+        qjl = QJL(dim=dim, seed=13)
+        compressed = qjl.quantize(vectors)
+        compressed.save(tmp_path / "store")
+
+        store = CompressedStore.load(tmp_path / "store")
+
+        query = vectors[0]
+        k = 5
+        results = store.search(query, k=k)
+
+        assert len(results) == k
+        scores = [score for _, score in results]
+        assert scores == sorted(scores, reverse=True)
+        returned_indices = [idx for idx, _ in results]
+        assert 0 in returned_indices
+
+    def test_search_k_larger_than_n(self, tmp_path: Path) -> None:
+        from turboquant.turboquant import TurboQuant
+
+        dim = 32
+        n = 10
+        rng = np.random.default_rng(2)
+        vectors = rng.standard_normal((n, dim))
+
+        tq = TurboQuant(dim=dim, bit_width=2, mode="mse", seed=99)
+        compressed = tq.quantize(vectors)
+        compressed.save(tmp_path / "store")
+
+        store = CompressedStore.load(tmp_path / "store")
+
+        query = rng.standard_normal(dim)
+        results = store.search(query, k=100)
+
+        # Should return all n vectors, not error or return more than n
+        assert len(results) == n
+        scores = [score for _, score in results]
+        assert scores == sorted(scores, reverse=True)

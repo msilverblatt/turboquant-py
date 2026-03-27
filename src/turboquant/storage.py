@@ -12,6 +12,7 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+from turboquant._bitpack import pack_indices, unpack_indices
 from turboquant.exceptions import StorageError
 
 __all__ = ["CompressedStore", "CompressedVectors"]
@@ -134,17 +135,26 @@ class CompressedVectors:
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
 
+        indices_shape = self.indices.shape
+        if self.bit_width < 8:
+            flat = self.indices.ravel()
+            packed = pack_indices(flat, self.bit_width)
+        else:
+            packed = self.indices
+
         meta = {
             "dim": self.dim,
             "bit_width": self.bit_width,
             "num_vectors": self.num_vectors,
+            "indices_packed": self.bit_width < 8,
+            "indices_shape": list(indices_shape),
             "extra_array_names": list(self.extra_arrays.keys()),
             **self.metadata,
         }
         with open(path / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)
 
-        np.save(path / "indices.npy", self.indices)
+        np.save(path / "indices.npy", packed)
         np.save(path / "norms.npy", self.norms)
 
         for name, arr in self.extra_arrays.items():
@@ -186,10 +196,19 @@ class CompressedVectors:
 
         dim = meta.pop("dim")
         bit_width = meta.pop("bit_width")
-        meta.pop("num_vectors")
+        meta.pop("num_vectors", None)
+        is_packed = meta.pop("indices_packed", False)
+        indices_shape = meta.pop("indices_shape", None)
         extra_names = meta.pop("extra_array_names", [])
 
-        indices = np.load(path / "indices.npy", mmap_mode=mmap_mode)
+        raw = np.load(path / "indices.npy", mmap_mode=mmap_mode)
+        if is_packed and indices_shape is not None:
+            n_values = int(np.prod(indices_shape))
+            # mmap arrays are read-only; make a writable copy for unpack
+            raw_arr = np.array(raw)
+            indices = unpack_indices(raw_arr, bit_width, n_values).reshape(indices_shape)
+        else:
+            indices = np.array(raw) if mmap_mode else raw
         norms = np.load(path / "norms.npy", mmap_mode=mmap_mode)
 
         extra_arrays = {}
@@ -261,3 +280,58 @@ class CompressedStore:
     def vectors(self) -> CompressedVectors:
         """Access the underlying CompressedVectors."""
         return self._vectors
+
+    def _build_quantizer(self) -> Any:
+        """Reconstruct the quantizer from saved metadata."""
+        meta = self._vectors.metadata
+        mode = meta.get("mode", "unknown")
+        seed = meta.get("seed")
+
+        if mode == "qjl":
+            from turboquant.qjl import QJL
+
+            projection_dim = meta.get("projection_dim", self._vectors.dim)
+            return QJL(dim=self._vectors.dim, projection_dim=projection_dim, seed=seed)
+
+        if mode in {"mse", "inner_product"}:
+            from turboquant.turboquant import TurboQuant
+
+            return TurboQuant(
+                dim=self._vectors.dim,
+                bit_width=self._vectors.bit_width,
+                mode=mode,
+                seed=seed,
+            )
+
+        raise StorageError(
+            f"Cannot reconstruct quantizer for unknown mode: {mode!r}"
+        )
+
+    def search(
+        self,
+        query: NDArray[np.float64],
+        k: int = 10,
+    ) -> list[tuple[int, float]]:
+        """Search for the top-k most similar vectors.
+
+        Parameters
+        ----------
+        query : NDArray[np.float64]
+            Query vector of shape ``(dim,)``.
+        k : int
+            Number of results to return.
+
+        Returns
+        -------
+        list[tuple[int, float]]
+            Top-k ``(index, score)`` pairs sorted by descending score.
+        """
+        query = np.asarray(query, dtype=np.float64)
+        quantizer = self._build_quantizer()
+        scores = quantizer.inner_product(query, self._vectors)
+
+        effective_k = min(k, self._vectors.num_vectors)
+        top_indices = np.argpartition(scores, -effective_k)[-effective_k:]
+        top_indices = top_indices[np.argsort(scores[top_indices])[::-1]]
+
+        return [(int(idx), float(scores[idx])) for idx in top_indices]

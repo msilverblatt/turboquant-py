@@ -163,13 +163,12 @@ class TurboQuant:
 
             # Quantize all channels; outlier channels use higher bit-width codebook
             indices = np.empty((n, self._dim), dtype=np.uint8)
-            for i in range(n):
-                indices[i, inlier_indices] = quantize_scalar(
-                    rotated[i, inlier_indices], boundaries_in
-                )
-                indices[i, outlier_indices] = quantize_scalar(
-                    rotated[i, outlier_indices], boundaries_out
-                )
+            indices[:, inlier_indices] = quantize_scalar(
+                rotated[:, inlier_indices], boundaries_in
+            )
+            indices[:, outlier_indices] = quantize_scalar(
+                rotated[:, outlier_indices], boundaries_out
+            )
 
             extra_arrays["outlier_indices"] = outlier_indices.astype(np.int64)
             extra_arrays["inlier_indices"] = inlier_indices.astype(np.int64)
@@ -177,9 +176,7 @@ class TurboQuant:
         else:
             # Standard path: all channels use the same codebook
             _centroids, boundaries = get_codebook(self._dim, bit_width)
-            indices = np.empty((n, self._dim), dtype=np.uint8)
-            for i in range(n):
-                indices[i] = quantize_scalar(rotated[i], boundaries)
+            indices = quantize_scalar(rotated, boundaries)
 
         return CompressedVectors(
             indices=indices,
@@ -266,9 +263,6 @@ class TurboQuant:
         # Determine bit_width for codebook lookup
         bw = self._bit_width - 1 if self._mode == "inner_product" else self._bit_width
 
-        n = compressed.indices.shape[0]
-        reconstructed_rotated = np.empty((n, self._dim), dtype=np.float64)
-
         if "outlier_indices" in compressed.extra_arrays:
             outlier_indices = compressed.extra_arrays["outlier_indices"]
             inlier_indices = compressed.extra_arrays["inlier_indices"]
@@ -277,17 +271,16 @@ class TurboQuant:
             centroids_in, _ = get_codebook(self._dim, bw)
             centroids_out, _ = get_codebook(self._dim, outlier_bw)
 
-            for i in range(n):
-                reconstructed_rotated[i, inlier_indices] = dequantize_scalar(
-                    compressed.indices[i, inlier_indices], centroids_in
-                )
-                reconstructed_rotated[i, outlier_indices] = dequantize_scalar(
-                    compressed.indices[i, outlier_indices], centroids_out
-                )
+            reconstructed_rotated = np.empty(compressed.indices.shape, dtype=np.float64)
+            reconstructed_rotated[:, inlier_indices] = dequantize_scalar(
+                compressed.indices[:, inlier_indices], centroids_in
+            )
+            reconstructed_rotated[:, outlier_indices] = dequantize_scalar(
+                compressed.indices[:, outlier_indices], centroids_out
+            )
         else:
             centroids, _ = get_codebook(self._dim, bw)
-            for i in range(n):
-                reconstructed_rotated[i] = dequantize_scalar(compressed.indices[i], centroids)
+            reconstructed_rotated = dequantize_scalar(compressed.indices, centroids)
 
         # Rotate back: x_hat = Pi @ y
         reconstructed = matmul(self._rotation, reconstructed_rotated.T).T
