@@ -9,420 +9,420 @@
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.012414165990776382
+      "time_s": 0.01278887499938719
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.002817750006215647
+      "time_s": 0.002958500001113862
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 0.28299345800769515
+      "time_s": 0.3061890829994809
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.003356417000759393
+      "time_s": 0.003632209001807496
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 0.027520999996340834
+      "time_s": 0.028867500004707836
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.01290175000031013
+      "time_s": 0.014403584005776793
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.003078374997130595
+      "time_s": 0.003784582993830554
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 0.3343507500103442
+      "time_s": 0.5290741249918938
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.00368249999883119
+      "time_s": 0.004593834004481323
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 0.05986358399968594
+      "time_s": 0.21583220800675917
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.12913775000197347
+      "time_s": 0.13297495798906311
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.030415457993512973
+      "time_s": 0.03099337499588728
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 3.1914229999965755
+      "time_s": 3.2063847499957774
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.03637558300397359
+      "time_s": 0.03650770799140446
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 0.37440970800525974
+      "time_s": 0.39978200000768993
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.13533504199585877
+      "time_s": 0.1369452920043841
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.036373333001392893
+      "time_s": 0.035354625011677854
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 4.245758124990971
+      "time_s": 4.2251821249956265
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.043522958003450185
+      "time_s": 0.03996549999283161
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 0.7858594999997877
+      "time_s": 1.198740749998251
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.0222397089964943
+      "time_s": 0.022879291995195672
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.007011041991063394
+      "time_s": 0.007463000001735054
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 0.7373972499917727
+      "time_s": 0.8263830829964718
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.008857333014020696
+      "time_s": 0.010135709002497606
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 0.06047233300341759
+      "time_s": 0.06113058399932925
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.027323624992277473
+      "time_s": 0.02534820800065063
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.00809420800942462
+      "time_s": 0.0076335409976309165
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 0.9110175829991931
+      "time_s": 1.0911477500048932
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.01026508399809245
+      "time_s": 0.010416749995783903
     },
     {
       "dim": 768,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 0.12977166600467172
+      "time_s": 0.36894766600744333
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.22563841599912848
+      "time_s": 0.24051558300561737
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.06941795800230466
+      "time_s": 0.07237954199081287
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 7.288743333003367
+      "time_s": 7.453165915998397
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.08859116600069683
+      "time_s": 0.09167016600258648
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 0.9145575410075253
+      "time_s": 0.9372368750046007
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.24665179100702517
+      "time_s": 0.23551679198862985
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.08998675001203083
+      "time_s": 0.06857945899537299
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 10.148184874997241
+      "time_s": 8.67649033300404
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.11243449999892619
+      "time_s": 0.08793349999177735
     },
     {
       "dim": 768,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 1.7410549170017475
+      "time_s": 2.214432708991808
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.04769304199726321
+      "time_s": 0.04769754099834245
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.020638582995161414
+      "time_s": 0.021495833003427833
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 2.1829518330050632
+      "time_s": 2.1873035419994267
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.025420250007300638
+      "time_s": 0.02501749999646563
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 0.17012429199530743
+      "time_s": 0.16716349999478552
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.05651270800444763
+      "time_s": 0.047920415992848575
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.024489000003086403
+      "time_s": 0.013396500013186596
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 2.5121012499876088
+      "time_s": 2.0415695420088014
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.027855749998707324
+      "time_s": 0.01718424999853596
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 0.3261182499991264
+      "time_s": 0.5988954170024954
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "numpy",
-      "time_s": 0.4864588329946855
+      "time_s": 0.4827867080020951
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "numpy",
-      "time_s": 0.21282141699339263
+      "time_s": 0.2157652500027325
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "numpy",
-      "time_s": 22.0319171250012
+      "time_s": 23.159791875004885
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "numpy",
-      "time_s": 0.2630591670022113
+      "time_s": 0.30463174999749754
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "numpy",
-      "time_s": 1.8886334580020048
+      "time_s": 2.188627874988015
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_quantize",
       "backend": "pytorch",
-      "time_s": 0.5509188329888275
+      "time_s": 0.46117679099552333
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
       "backend": "pytorch",
-      "time_s": 0.27170716699038167
+      "time_s": 0.17815004200383555
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
       "backend": "pytorch",
-      "time_s": 29.875336375000188
+      "time_s": 20.409773084000335
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
       "backend": "pytorch",
-      "time_s": 0.323699000000488
+      "time_s": 0.23017783400428016
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
       "backend": "pytorch",
-      "time_s": 3.9850867499917513
+      "time_s": 4.799625500003458
     }
   ],
   "comparison": [
@@ -430,241 +430,241 @@
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_inner_product",
-      "numpy_time_s": 0.027521,
-      "pytorch_time_s": 0.059864,
-      "speedup": 0.46
+      "numpy_time_s": 0.028868,
+      "pytorch_time_s": 0.215832,
+      "speedup": 0.134
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "qjl_quantize",
-      "numpy_time_s": 0.003356,
-      "pytorch_time_s": 0.003682,
-      "speedup": 0.911
+      "numpy_time_s": 0.003632,
+      "pytorch_time_s": 0.004594,
+      "speedup": 0.791
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
-      "numpy_time_s": 0.002818,
-      "pytorch_time_s": 0.003078,
-      "speedup": 0.915
+      "numpy_time_s": 0.002959,
+      "pytorch_time_s": 0.003785,
+      "speedup": 0.782
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
-      "numpy_time_s": 0.282993,
-      "pytorch_time_s": 0.334351,
-      "speedup": 0.846
+      "numpy_time_s": 0.306189,
+      "pytorch_time_s": 0.529074,
+      "speedup": 0.579
     },
     {
       "dim": 384,
       "n_vectors": 1000,
       "operation": "tq_quantize",
-      "numpy_time_s": 0.012414,
-      "pytorch_time_s": 0.012902,
-      "speedup": 0.962
+      "numpy_time_s": 0.012789,
+      "pytorch_time_s": 0.014404,
+      "speedup": 0.888
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
-      "numpy_time_s": 0.37441,
-      "pytorch_time_s": 0.785859,
-      "speedup": 0.476
+      "numpy_time_s": 0.399782,
+      "pytorch_time_s": 1.198741,
+      "speedup": 0.334
     },
     {
       "dim": 384,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
-      "numpy_time_s": 0.036376,
-      "pytorch_time_s": 0.043523,
-      "speedup": 0.836
-    },
-    {
-      "dim": 384,
-      "n_vectors": 10000,
-      "operation": "tq_dequantize",
-      "numpy_time_s": 0.030415,
-      "pytorch_time_s": 0.036373,
-      "speedup": 0.836
-    },
-    {
-      "dim": 384,
-      "n_vectors": 10000,
-      "operation": "tq_inner_product",
-      "numpy_time_s": 3.191423,
-      "pytorch_time_s": 4.245758,
-      "speedup": 0.752
-    },
-    {
-      "dim": 384,
-      "n_vectors": 10000,
-      "operation": "tq_quantize",
-      "numpy_time_s": 0.129138,
-      "pytorch_time_s": 0.135335,
-      "speedup": 0.954
-    },
-    {
-      "dim": 768,
-      "n_vectors": 1000,
-      "operation": "qjl_inner_product",
-      "numpy_time_s": 0.060472,
-      "pytorch_time_s": 0.129772,
-      "speedup": 0.466
-    },
-    {
-      "dim": 768,
-      "n_vectors": 1000,
-      "operation": "qjl_quantize",
-      "numpy_time_s": 0.008857,
-      "pytorch_time_s": 0.010265,
-      "speedup": 0.863
-    },
-    {
-      "dim": 768,
-      "n_vectors": 1000,
-      "operation": "tq_dequantize",
-      "numpy_time_s": 0.007011,
-      "pytorch_time_s": 0.008094,
-      "speedup": 0.866
-    },
-    {
-      "dim": 768,
-      "n_vectors": 1000,
-      "operation": "tq_inner_product",
-      "numpy_time_s": 0.737397,
-      "pytorch_time_s": 0.911018,
-      "speedup": 0.809
-    },
-    {
-      "dim": 768,
-      "n_vectors": 1000,
-      "operation": "tq_quantize",
-      "numpy_time_s": 0.02224,
-      "pytorch_time_s": 0.027324,
-      "speedup": 0.814
-    },
-    {
-      "dim": 768,
-      "n_vectors": 10000,
-      "operation": "qjl_inner_product",
-      "numpy_time_s": 0.914558,
-      "pytorch_time_s": 1.741055,
-      "speedup": 0.525
-    },
-    {
-      "dim": 768,
-      "n_vectors": 10000,
-      "operation": "qjl_quantize",
-      "numpy_time_s": 0.088591,
-      "pytorch_time_s": 0.112434,
-      "speedup": 0.788
-    },
-    {
-      "dim": 768,
-      "n_vectors": 10000,
-      "operation": "tq_dequantize",
-      "numpy_time_s": 0.069418,
-      "pytorch_time_s": 0.089987,
-      "speedup": 0.771
-    },
-    {
-      "dim": 768,
-      "n_vectors": 10000,
-      "operation": "tq_inner_product",
-      "numpy_time_s": 7.288743,
-      "pytorch_time_s": 10.148185,
-      "speedup": 0.718
-    },
-    {
-      "dim": 768,
-      "n_vectors": 10000,
-      "operation": "tq_quantize",
-      "numpy_time_s": 0.225638,
-      "pytorch_time_s": 0.246652,
-      "speedup": 0.915
-    },
-    {
-      "dim": 1536,
-      "n_vectors": 1000,
-      "operation": "qjl_inner_product",
-      "numpy_time_s": 0.170124,
-      "pytorch_time_s": 0.326118,
-      "speedup": 0.522
-    },
-    {
-      "dim": 1536,
-      "n_vectors": 1000,
-      "operation": "qjl_quantize",
-      "numpy_time_s": 0.02542,
-      "pytorch_time_s": 0.027856,
+      "numpy_time_s": 0.036508,
+      "pytorch_time_s": 0.039965,
       "speedup": 0.913
     },
     {
+      "dim": 384,
+      "n_vectors": 10000,
+      "operation": "tq_dequantize",
+      "numpy_time_s": 0.030993,
+      "pytorch_time_s": 0.035355,
+      "speedup": 0.877
+    },
+    {
+      "dim": 384,
+      "n_vectors": 10000,
+      "operation": "tq_inner_product",
+      "numpy_time_s": 3.206385,
+      "pytorch_time_s": 4.225182,
+      "speedup": 0.759
+    },
+    {
+      "dim": 384,
+      "n_vectors": 10000,
+      "operation": "tq_quantize",
+      "numpy_time_s": 0.132975,
+      "pytorch_time_s": 0.136945,
+      "speedup": 0.971
+    },
+    {
+      "dim": 768,
+      "n_vectors": 1000,
+      "operation": "qjl_inner_product",
+      "numpy_time_s": 0.061131,
+      "pytorch_time_s": 0.368948,
+      "speedup": 0.166
+    },
+    {
+      "dim": 768,
+      "n_vectors": 1000,
+      "operation": "qjl_quantize",
+      "numpy_time_s": 0.010136,
+      "pytorch_time_s": 0.010417,
+      "speedup": 0.973
+    },
+    {
+      "dim": 768,
+      "n_vectors": 1000,
+      "operation": "tq_dequantize",
+      "numpy_time_s": 0.007463,
+      "pytorch_time_s": 0.007634,
+      "speedup": 0.978
+    },
+    {
+      "dim": 768,
+      "n_vectors": 1000,
+      "operation": "tq_inner_product",
+      "numpy_time_s": 0.826383,
+      "pytorch_time_s": 1.091148,
+      "speedup": 0.757
+    },
+    {
+      "dim": 768,
+      "n_vectors": 1000,
+      "operation": "tq_quantize",
+      "numpy_time_s": 0.022879,
+      "pytorch_time_s": 0.025348,
+      "speedup": 0.903
+    },
+    {
+      "dim": 768,
+      "n_vectors": 10000,
+      "operation": "qjl_inner_product",
+      "numpy_time_s": 0.937237,
+      "pytorch_time_s": 2.214433,
+      "speedup": 0.423
+    },
+    {
+      "dim": 768,
+      "n_vectors": 10000,
+      "operation": "qjl_quantize",
+      "numpy_time_s": 0.09167,
+      "pytorch_time_s": 0.087933,
+      "speedup": 1.042
+    },
+    {
+      "dim": 768,
+      "n_vectors": 10000,
+      "operation": "tq_dequantize",
+      "numpy_time_s": 0.07238,
+      "pytorch_time_s": 0.068579,
+      "speedup": 1.055
+    },
+    {
+      "dim": 768,
+      "n_vectors": 10000,
+      "operation": "tq_inner_product",
+      "numpy_time_s": 7.453166,
+      "pytorch_time_s": 8.67649,
+      "speedup": 0.859
+    },
+    {
+      "dim": 768,
+      "n_vectors": 10000,
+      "operation": "tq_quantize",
+      "numpy_time_s": 0.240516,
+      "pytorch_time_s": 0.235517,
+      "speedup": 1.021
+    },
+    {
+      "dim": 1536,
+      "n_vectors": 1000,
+      "operation": "qjl_inner_product",
+      "numpy_time_s": 0.167163,
+      "pytorch_time_s": 0.598895,
+      "speedup": 0.279
+    },
+    {
+      "dim": 1536,
+      "n_vectors": 1000,
+      "operation": "qjl_quantize",
+      "numpy_time_s": 0.025017,
+      "pytorch_time_s": 0.017184,
+      "speedup": 1.456
+    },
+    {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_dequantize",
-      "numpy_time_s": 0.020639,
-      "pytorch_time_s": 0.024489,
-      "speedup": 0.843
+      "numpy_time_s": 0.021496,
+      "pytorch_time_s": 0.013397,
+      "speedup": 1.605
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_inner_product",
-      "numpy_time_s": 2.182952,
-      "pytorch_time_s": 2.512101,
-      "speedup": 0.869
+      "numpy_time_s": 2.187304,
+      "pytorch_time_s": 2.04157,
+      "speedup": 1.071
     },
     {
       "dim": 1536,
       "n_vectors": 1000,
       "operation": "tq_quantize",
-      "numpy_time_s": 0.047693,
-      "pytorch_time_s": 0.056513,
-      "speedup": 0.844
+      "numpy_time_s": 0.047698,
+      "pytorch_time_s": 0.04792,
+      "speedup": 0.995
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_inner_product",
-      "numpy_time_s": 1.888633,
-      "pytorch_time_s": 3.985087,
-      "speedup": 0.474
+      "numpy_time_s": 2.188628,
+      "pytorch_time_s": 4.799626,
+      "speedup": 0.456
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "qjl_quantize",
-      "numpy_time_s": 0.263059,
-      "pytorch_time_s": 0.323699,
-      "speedup": 0.813
+      "numpy_time_s": 0.304632,
+      "pytorch_time_s": 0.230178,
+      "speedup": 1.323
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_dequantize",
-      "numpy_time_s": 0.212821,
-      "pytorch_time_s": 0.271707,
-      "speedup": 0.783
+      "numpy_time_s": 0.215765,
+      "pytorch_time_s": 0.17815,
+      "speedup": 1.211
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_inner_product",
-      "numpy_time_s": 22.031917,
-      "pytorch_time_s": 29.875336,
-      "speedup": 0.737
+      "numpy_time_s": 23.159792,
+      "pytorch_time_s": 20.409773,
+      "speedup": 1.135
     },
     {
       "dim": 1536,
       "n_vectors": 10000,
       "operation": "tq_quantize",
-      "numpy_time_s": 0.486459,
-      "pytorch_time_s": 0.550919,
-      "speedup": 0.883
+      "numpy_time_s": 0.482787,
+      "pytorch_time_s": 0.461177,
+      "speedup": 1.047
     }
   ]
 }
