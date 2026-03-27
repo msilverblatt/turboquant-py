@@ -40,3 +40,8 @@ select = [
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+
+[dependency-groups]
+dev = [
+    "scikit-learn>=1.7.2",
+]
