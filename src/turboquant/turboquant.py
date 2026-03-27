@@ -60,6 +60,8 @@ class TurboQuant:
         bit_width: int,
         mode: str = "mse",
         seed: int | None = None,
+        outlier_channels: int = 0,
+        outlier_bit_width: int | None = None,
     ) -> None:
         if bit_width < _MIN_BIT_WIDTH or bit_width > _MAX_BIT_WIDTH:
             raise InvalidBitWidthError(bit_width, (_MIN_BIT_WIDTH, _MAX_BIT_WIDTH))
@@ -72,6 +74,8 @@ class TurboQuant:
         self._bit_width = bit_width
         self._mode = mode
         self._seed = seed
+        self._outlier_channels = outlier_channels
+        self._outlier_bit_width = outlier_bit_width
 
         # Generate random rotation matrix
         self._rotation = generate_orthogonal_matrix(dim, seed=seed)
@@ -140,21 +144,50 @@ class TurboQuant:
         # Rotate: y = Pi^T @ x^T => (dim, n), transpose to (n, dim)
         rotated = matmul(self._rotation.T, unit_vectors.T).T
 
-        # Get codebook for this dim and bit_width
-        _centroids, boundaries = get_codebook(self._dim, bit_width)
-
-        # Scalar quantize each row
         n = rotated.shape[0]
-        indices = np.empty((n, self._dim), dtype=np.uint8)
-        for i in range(n):
-            indices[i] = quantize_scalar(rotated[i], boundaries)
+        extra_arrays: dict[str, NDArray] = {}
+        metadata: dict[str, object] = {"mode": self._mode, "seed": self._seed}
+
+        if self._outlier_channels > 0 and self._outlier_bit_width is not None:
+            # Detect outlier channels by average magnitude across the batch
+            avg_magnitude = np.mean(np.abs(rotated), axis=0)
+            outlier_indices = np.argsort(avg_magnitude)[-self._outlier_channels :]
+            all_indices = np.arange(self._dim)
+            inlier_mask = np.ones(self._dim, dtype=bool)
+            inlier_mask[outlier_indices] = False
+            inlier_indices = all_indices[inlier_mask]
+
+            # Codebooks for inlier and outlier channels
+            _centroids_in, boundaries_in = get_codebook(self._dim, bit_width)
+            _centroids_out, boundaries_out = get_codebook(self._dim, self._outlier_bit_width)
+
+            # Quantize all channels; outlier channels use higher bit-width codebook
+            indices = np.empty((n, self._dim), dtype=np.uint8)
+            for i in range(n):
+                indices[i, inlier_indices] = quantize_scalar(
+                    rotated[i, inlier_indices], boundaries_in
+                )
+                indices[i, outlier_indices] = quantize_scalar(
+                    rotated[i, outlier_indices], boundaries_out
+                )
+
+            extra_arrays["outlier_indices"] = outlier_indices.astype(np.int64)
+            extra_arrays["inlier_indices"] = inlier_indices.astype(np.int64)
+            metadata["outlier_bit_width"] = self._outlier_bit_width
+        else:
+            # Standard path: all channels use the same codebook
+            _centroids, boundaries = get_codebook(self._dim, bit_width)
+            indices = np.empty((n, self._dim), dtype=np.uint8)
+            for i in range(n):
+                indices[i] = quantize_scalar(rotated[i], boundaries)
 
         return CompressedVectors(
             indices=indices,
             norms=norms,
             dim=self._dim,
             bit_width=bit_width,
-            metadata={"mode": self._mode, "seed": self._seed},
+            metadata=metadata,
+            extra_arrays=extra_arrays,
         )
 
     def _quantize_inner_product(
@@ -182,16 +215,27 @@ class TurboQuant:
         residual_signs = np.sign(projected_residual).astype(np.int8)
         residual_signs[residual_signs == 0] = 1
 
+        # Merge outlier arrays from MSE stage with QJL arrays
+        merged_extra: dict[str, NDArray] = {}
+        merged_extra.update(mse_compressed.extra_arrays)
+        merged_extra["residual_signs"] = residual_signs
+        merged_extra["residual_norms"] = residual_norms
+
+        merged_metadata: dict[str, object] = {
+            "mode": self._mode,
+            "seed": self._seed,
+        }
+        merged_metadata.update(
+            {k: v for k, v in mse_compressed.metadata.items() if k not in merged_metadata}
+        )
+
         return CompressedVectors(
             indices=mse_compressed.indices,
             norms=norms,
             dim=self._dim,
             bit_width=self._bit_width,
-            metadata={"mode": self._mode, "seed": self._seed},
-            extra_arrays={
-                "residual_signs": residual_signs,
-                "residual_norms": residual_norms,
-            },
+            metadata=merged_metadata,
+            extra_arrays=merged_extra,
         )
 
     def dequantize(self, compressed: CompressedVectors) -> NDArray[np.float64]:
@@ -222,13 +266,28 @@ class TurboQuant:
         # Determine bit_width for codebook lookup
         bw = self._bit_width - 1 if self._mode == "inner_product" else self._bit_width
 
-        centroids, _ = get_codebook(self._dim, bw)
-
-        # Look up centroids for each index
         n = compressed.indices.shape[0]
         reconstructed_rotated = np.empty((n, self._dim), dtype=np.float64)
-        for i in range(n):
-            reconstructed_rotated[i] = dequantize_scalar(compressed.indices[i], centroids)
+
+        if "outlier_indices" in compressed.extra_arrays:
+            outlier_indices = compressed.extra_arrays["outlier_indices"]
+            inlier_indices = compressed.extra_arrays["inlier_indices"]
+            outlier_bw = compressed.metadata["outlier_bit_width"]
+
+            centroids_in, _ = get_codebook(self._dim, bw)
+            centroids_out, _ = get_codebook(self._dim, outlier_bw)
+
+            for i in range(n):
+                reconstructed_rotated[i, inlier_indices] = dequantize_scalar(
+                    compressed.indices[i, inlier_indices], centroids_in
+                )
+                reconstructed_rotated[i, outlier_indices] = dequantize_scalar(
+                    compressed.indices[i, outlier_indices], centroids_out
+                )
+        else:
+            centroids, _ = get_codebook(self._dim, bw)
+            for i in range(n):
+                reconstructed_rotated[i] = dequantize_scalar(compressed.indices[i], centroids)
 
         # Rotate back: x_hat = Pi @ y
         reconstructed = matmul(self._rotation, reconstructed_rotated.T).T
