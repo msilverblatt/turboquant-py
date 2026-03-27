@@ -12,9 +12,11 @@ from turboquant.exceptions import (
     StorageError,
     TurboQuantError,
 )
-from turboquant.storage import CompressedVectors, CompressedStore
+from turboquant.qjl import QJL
+from turboquant.storage import CompressedStore, CompressedVectors
 
 __all__ = [
+    "QJL",
     "CompressedStore",
     "CompressedVectors",
     "DimensionMismatchError",
