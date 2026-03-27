@@ -44,7 +44,7 @@ from turboquant import TurboQuant
 db = np.random.randn(10000, 768)
 query = np.random.randn(768)
 
-tq = TurboQuant(dim=768, bit_width=3, mode="inner_product", seed=42)
+tq = TurboQuant(dim=768, bit_width=3, seed=42)  # inner_product mode is the default
 compressed = tq.quantize(db)
 
 # Estimate inner products against all compressed database vectors
@@ -80,7 +80,7 @@ Multi-bit vector quantizer supporting MSE and inner-product modes.
 |---|---|---|---|
 | `dim` | `int` | required | Input vector dimensionality |
 | `bit_width` | `int` | required | Bits per coordinate (1-4; inner-product mode requires 2+) |
-| `mode` | `str` | `"mse"` | `"mse"` for reconstruction quality; `"inner_product"` for unbiased similarity search |
+| `mode` | `str` | `"inner_product"` | `"mse"` for reconstruction quality; `"inner_product"` for unbiased similarity search |
 | `seed` | `int \| None` | `None` | Random seed for the rotation matrix and QJL projection |
 | `outlier_channels` | `int` | `0` | Number of high-magnitude channels to quantize at higher precision |
 | `outlier_bit_width` | `int \| None` | `None` | Bit-width for outlier channels |
@@ -100,7 +100,7 @@ Multi-bit vector quantizer supporting MSE and inner-product modes.
 | Parameter | Type | Default | Description |
 |---|---|---|---|
 | `dim` | `int` | required | Input vector dimensionality |
-| `projection_dim` | `int \| None` | `dim` | Projection dimension; higher values improve accuracy at the cost of storage |
+| `projection_dim` | `int \| None` | `dim` | Projection dimension (must be <= dim); higher values improve accuracy at the cost of storage |
 | `seed` | `int \| None` | `None` | Random seed for the projection matrix |
 
 **Methods:**
@@ -174,7 +174,7 @@ Rotation and projection matrices are not stored — they are reconstructed deter
 
 ### Entropy encoding
 
-Indices can optionally be Huffman-encoded when saving, providing lossless compression:
+Indices can optionally be Huffman-encoded when saving, providing lossless compression. Savings are measured vs fixed-width encoding (not vs bit-packing):
 
 | Bit-width | Shannon entropy | Huffman avg bits | Savings |
 |-----------|----------------|-----------------|---------|
