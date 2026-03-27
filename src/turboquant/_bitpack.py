@@ -28,26 +28,21 @@ def pack_indices(indices: NDArray[np.uint8], bit_width: int) -> NDArray[np.uint8
         Bit-packed byte array of size ceil(len(indices) * bit_width / 8).
     """
     n = len(indices)
-    total_bits = n * bit_width
-    n_bytes = (total_bits + 7) // 8
-    packed = np.zeros(n_bytes, dtype=np.uint8)
-
     if bit_width == 8:
         return indices.copy()
 
-    bit_pos = 0
-    for i in range(n):
-        val = int(indices[i])
-        byte_idx = bit_pos // 8
-        bit_offset = bit_pos % 8
+    total_bits = n * bit_width
+    n_bytes = (total_bits + 7) // 8
 
-        packed[byte_idx] |= np.uint8((val << bit_offset) & 0xFF)
-        if bit_offset + bit_width > 8 and byte_idx + 1 < n_bytes:
-            packed[byte_idx + 1] |= np.uint8(val >> (8 - bit_offset))
+    # Expand each index into its individual bits (LSB first)
+    bit_positions = np.arange(bit_width, dtype=np.uint8)
+    bits = ((indices[:, np.newaxis] >> bit_positions[np.newaxis, :]) & 1).ravel()
 
-        bit_pos += bit_width
+    # Pad to full byte boundary
+    padded = np.zeros(n_bytes * 8, dtype=np.uint8)
+    padded[: len(bits)] = bits
 
-    return packed
+    return np.packbits(padded, bitorder="little")
 
 
 def unpack_indices(packed: NDArray[np.uint8], bit_width: int, n_values: int) -> NDArray[np.uint8]:
@@ -67,22 +62,16 @@ def unpack_indices(packed: NDArray[np.uint8], bit_width: int, n_values: int) -> 
     NDArray[np.uint8]
         Array of indices of length n_values, each in range [0, 2^bit_width - 1].
     """
-    mask = (1 << bit_width) - 1
-    result = np.empty(n_values, dtype=np.uint8)
-
     if bit_width == 8:
         return packed[:n_values].copy()
 
-    bit_pos = 0
-    for i in range(n_values):
-        byte_idx = bit_pos // 8
-        bit_offset = bit_pos % 8
+    # Unpack all bytes into individual bits (LSB first)
+    bits = np.unpackbits(packed, bitorder="little")
 
-        val = int(packed[byte_idx]) >> bit_offset
-        if bit_offset + bit_width > 8 and byte_idx + 1 < len(packed):
-            val |= int(packed[byte_idx + 1]) << (8 - bit_offset)
+    # Take only the bits we need and reshape to (n_values, bit_width)
+    total_bits = n_values * bit_width
+    bits = bits[:total_bits].reshape(n_values, bit_width)
 
-        result[i] = val & mask
-        bit_pos += bit_width
-
-    return result
+    # Reconstruct values: multiply each bit by its power of 2 and sum
+    powers = (1 << np.arange(bit_width, dtype=np.uint8)).astype(np.uint8)
+    return (bits * powers).sum(axis=1).astype(np.uint8)
