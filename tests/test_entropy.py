@@ -150,27 +150,25 @@ class TestSaveLoadWithEntropy:
         assert not (save_path / "indices.npy").exists()
 
     def test_file_size_reduction(self, tmp_path: Path) -> None:
-        """Entropy-encoded indices should be smaller than bit-packed indices."""
-        n, dim, bit_width = 1000, 256, 4
+        """Entropy encoding should be smaller than raw uint8 storage."""
         rng = np.random.default_rng(42)
-        max_val = (1 << bit_width) - 1
+        n, dim, bw = 10_000, 256, 4
+        max_val = (1 << bw) - 1
         indices = rng.integers(0, max_val + 1, size=(n, dim), dtype=np.uint8)
         norms = rng.random(n).astype(np.float64) + 0.5
+        meta = {"mode": "mse", "seed": 42}
         cv = CompressedVectors(
-            indices=indices,
-            norms=norms,
-            dim=dim,
-            bit_width=bit_width,
-            metadata={"mode": "mse"},
+            indices=indices, norms=norms, dim=dim, bit_width=bw, metadata=meta
         )
 
-        path_normal = tmp_path / "normal"
-        path_entropy = tmp_path / "entropy"
-        cv.save(path_normal, entropy_encode=False)
-        cv.save(path_entropy, entropy_encode=True)
+        cv.save(tmp_path / "entropy", entropy_encode=True)
 
-        entropy_size = (path_entropy / "indices.huffman").stat().st_size
-        assert entropy_size > 0, "Entropy encoded file should not be empty"
+        entropy_size = (tmp_path / "entropy" / "indices.huffman").stat().st_size
+        raw_size = n * dim  # 1 byte per index without any packing
+
+        assert entropy_size < raw_size, (
+            f"Entropy encoded ({entropy_size}) should be smaller than raw ({raw_size})"
+        )
 
     def test_extra_arrays_preserved(self, tmp_path: Path) -> None:
         cv = self._make_compressed()

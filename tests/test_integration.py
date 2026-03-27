@@ -121,3 +121,34 @@ class TestBatchQuantization:
         batched_reconstructed = tq.dequantize(batched_loaded)
 
         np.testing.assert_allclose(single_reconstructed, batched_reconstructed, atol=1e-10)
+
+
+class TestDimensionSweep:
+    """Verify quantization works correctly across all spec dimensions."""
+
+    @pytest.mark.parametrize("dim", [384, 512, 768, 1024, 1536, 2048, 3072])
+    def test_turboquant_mse_across_dimensions(self, dim: int) -> None:
+        rng = np.random.default_rng(42)
+        vectors = rng.standard_normal((50, dim))
+        norms = np.linalg.norm(vectors, axis=1, keepdims=True)
+        unit_vectors = vectors / norms
+
+        tq = TurboQuant(dim=dim, bit_width=3, mode="mse", seed=42)
+        compressed = tq.quantize(unit_vectors)
+        reconstructed = tq.dequantize(compressed)
+        mse = np.mean(np.sum((unit_vectors - reconstructed) ** 2, axis=1))
+
+        upper_bound = np.sqrt(3 * np.pi) / 2 * (1 / 4**3)
+        assert mse < upper_bound * 2, f"MSE {mse:.6f} exceeds bound at dim={dim}"
+
+    @pytest.mark.parametrize("dim", [384, 512, 768, 1024, 1536, 2048, 3072])
+    def test_qjl_across_dimensions(self, dim: int) -> None:
+        rng = np.random.default_rng(42)
+        vectors = rng.standard_normal((50, dim))
+        query = rng.standard_normal(dim)
+
+        qjl = QJL(dim=dim, seed=42)
+        compressed = qjl.quantize(vectors)
+        scores = qjl.inner_product(query, compressed)
+        assert scores.shape == (50,)
+        assert np.all(np.isfinite(scores))

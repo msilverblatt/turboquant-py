@@ -50,15 +50,21 @@ class TurboQuant:
         Bits per quantized coordinate (1-4).
     mode : str
         Quantization mode: ``"mse"`` or ``"inner_product"``.
+        Defaults to ``"inner_product"``.
     seed : int or None
         Random seed for reproducibility.
+    outlier_channels : int
+        Number of high-magnitude channels to quantize at higher precision.
+        0 disables outlier handling.
+    outlier_bit_width : int or None
+        Bit-width for outlier channels. Defaults to bit_width + 1 (capped at 4).
     """
 
     def __init__(
         self,
         dim: int,
         bit_width: int,
-        mode: str = "mse",
+        mode: str = "inner_product",
         seed: int | None = None,
         outlier_channels: int = 0,
         outlier_bit_width: int | None = None,
@@ -365,6 +371,11 @@ class TurboQuant:
     ) -> None:
         """Quantize vectors in batches, writing progressively to disk.
 
+        Accumulates only compressed per-vector data (indices, norms) across
+        batches, keeping a single copy of shared arrays (e.g. outlier_indices)
+        from the first batch.  This avoids holding redundant copies of shared
+        arrays that ``CompressedVectors.concatenate`` would retain.
+
         Parameters
         ----------
         vectors : Iterable[NDArray[np.float64]]
@@ -379,16 +390,47 @@ class TurboQuant:
             additional lossless compression.
         """
         output_path = Path(output_path)
-        parts: list[CompressedVectors] = []
+
+        all_indices: list[NDArray] = []
+        all_norms: list[NDArray] = []
+        per_vector_extras: dict[str, list[NDArray]] = {}
+        shared_extras: dict[str, NDArray] = {}
+        metadata: dict[str, object] = {}
+        first = True
 
         for batch in vectors:
             compressed = self.quantize(batch)
-            parts.append(compressed)
+            all_indices.append(compressed.indices)
+            all_norms.append(compressed.norms)
 
-        if not parts:
+            if first:
+                metadata = compressed.metadata.copy()
+                for k, v in compressed.extra_arrays.items():
+                    if v.shape[0] == compressed.num_vectors:
+                        per_vector_extras[k] = [v]
+                    else:
+                        shared_extras[k] = v
+                first = False
+            else:
+                for k in per_vector_extras:
+                    if k in compressed.extra_arrays:
+                        per_vector_extras[k].append(compressed.extra_arrays[k])
+
+        if not all_indices:
             raise ValueError("No vectors provided to quantize_batched")
 
-        merged = CompressedVectors.concatenate(parts)
+        merged_extras = {k: v.copy() for k, v in shared_extras.items()}
+        for k, arrays in per_vector_extras.items():
+            merged_extras[k] = np.concatenate(arrays, axis=0)
+
+        merged = CompressedVectors(
+            indices=np.concatenate(all_indices, axis=0),
+            norms=np.concatenate(all_norms),
+            dim=self._dim,
+            bit_width=self._bit_width,
+            metadata=metadata,
+            extra_arrays=merged_extras,
+        )
         merged.save(output_path, entropy_encode=entropy_encode)
         logger.info(
             "Batched quantization complete: %d vectors saved to %s",

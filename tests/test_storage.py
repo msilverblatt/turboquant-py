@@ -5,6 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
+from turboquant.exceptions import StorageError
 from turboquant.storage import CompressedStore, CompressedVectors
 
 
@@ -111,6 +112,15 @@ class TestCompressedVectors:
         # Verify round-trip correctness
         loaded = CompressedVectors.load(save_path)
         np.testing.assert_array_equal(loaded.indices, cv.indices)
+
+    def test_load_nonexistent_path_raises(self) -> None:
+        with pytest.raises(StorageError):
+            CompressedVectors.load("/nonexistent/path/xyz")
+
+    def test_load_missing_meta_raises(self, tmp_path: Path) -> None:
+        (tmp_path / "bad_store").mkdir()
+        with pytest.raises(StorageError):
+            CompressedVectors.load(tmp_path / "bad_store")
 
 
 class TestCompressedStoreSearch:
