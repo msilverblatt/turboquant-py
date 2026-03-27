@@ -61,18 +61,20 @@ class TestTurboQuantEndToEnd:
         top_5 = np.argsort(estimated_scores)[-5:]
         assert true_best in top_5, f"True best {true_best} not in top-5 estimated {top_5}"
 
-    def test_save_load_preserves_search(self, tmp_path: Path) -> None:
+    @pytest.mark.parametrize("mode", ["mse", "inner_product"])
+    def test_save_load_preserves_search(self, tmp_path: Path, mode: str) -> None:
         dim = 64
+        bw = 3 if mode == "inner_product" else 2
         rng = np.random.default_rng(42)
         vectors = rng.standard_normal((30, dim))
         query = rng.standard_normal(dim)
 
-        tq = TurboQuant(dim=dim, bit_width=3, mode="inner_product", seed=42)
+        tq = TurboQuant(dim=dim, bit_width=bw, mode=mode, seed=42)
         compressed = tq.quantize(vectors)
         scores_before = tq.inner_product(query, compressed)
 
-        compressed.save(tmp_path / "test_store")
-        loaded = CompressedVectors.load(tmp_path / "test_store")
+        compressed.save(tmp_path / f"test_store_{mode}")
+        loaded = CompressedVectors.load(tmp_path / f"test_store_{mode}")
         scores_after = tq.inner_product(query, loaded)
 
         np.testing.assert_allclose(scores_before, scores_after)

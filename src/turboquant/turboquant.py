@@ -270,9 +270,13 @@ class TurboQuant:
         if query.shape[-1] != self._dim:
             raise DimensionMismatchError(expected=self._dim, got=query.shape[-1])
 
-        # MSE part: dequantize and compute inner products
+        if self._mode == "mse":
+            # For MSE mode, dequantize and compute inner products directly
+            reconstructed = self.dequantize(compressed)
+            return batch_inner_product(query, reconstructed)
+
+        # Inner product mode: MSE part + QJL residual correction
         mse_reconstructed = self._dequantize_mse(compressed, return_unit=True)
-        # Scale by norms to get full reconstructed vectors
         mse_full = mse_reconstructed * compressed.norms[:, np.newaxis]
         mse_scores = batch_inner_product(query, mse_full)
 
@@ -280,14 +284,9 @@ class TurboQuant:
         residual_signs = compressed.extra_arrays["residual_signs"]  # (n, dim)
         residual_norms = compressed.extra_arrays["residual_norms"]  # (n,)
 
-        # Project query: S * y
         projected_query = matmul(self._projection, query)  # (dim,)
-
-        # <S*y, sign(S*r)> for each vector
         dot_products = batch_inner_product(projected_query, residual_signs.astype(np.float64))
 
-        # QJL estimator for residual: ||r|| * sqrt(pi/2) / d * <S*y, sign(S*r)>
-        # Also scale by original norms since residual is in unit-vector space
         d = self._dim
         scale = np.sqrt(np.pi / 2) / d
         qjl_scores = compressed.norms * residual_norms * scale * dot_products
