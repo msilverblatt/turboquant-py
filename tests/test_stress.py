@@ -366,18 +366,11 @@ class TestCompressedStoreEdgeCases:
             assert abs(score) < 5.0, f"Score {score} too large for orthogonal query"
 
     def test_search_k_equals_0(self, tmp_path: Path) -> None:
-        """search() with k=0 -- should return empty or handle gracefully."""
-        store, _vectors, _ = self._make_store(tmp_path, n=50, dim=64)
+        """search() with k=0 must raise ValueError."""
+        store, _, _ = self._make_store(tmp_path, n=50, dim=64)
         query = _make_rng(999).standard_normal(64)
-        # k=0 will cause np.argpartition(scores, 0) which returns all elements
-        # This tests whether the library handles it or crashes.
-        try:
-            results = store.search(query, k=0)
-            # If it doesn't crash, it should return empty or at most a small list
-            assert isinstance(results, list)
-        except (ValueError, IndexError):
-            # Crashing on k=0 is acceptable -- the test documents the behavior
-            pass
+        with pytest.raises(ValueError, match="k must be positive"):
+            store.search(query, k=0)
 
 
 # ===========================================================================

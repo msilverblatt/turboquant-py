@@ -12,7 +12,18 @@ import numpy as np
 if TYPE_CHECKING:
     from numpy.typing import NDArray
 
+    from turboquant.qjl import QJL
+    from turboquant.turboquant import TurboQuant
+
 from turboquant._bitpack import pack_indices, unpack_indices
+from turboquant._entropy import (
+    build_huffman_table,
+    compute_symbol_probabilities,
+    huffman_decode,
+    huffman_encode,
+    table_from_serializable,
+    table_to_serializable,
+)
 from turboquant.exceptions import StorageError
 
 __all__ = ["CompressedStore", "CompressedVectors"]
@@ -143,13 +154,16 @@ class CompressedVectors:
                 merged[k] = ref.extra_arrays[k].copy()
         return merged
 
-    def save(self, path: str | Path) -> None:
+    def save(self, path: str | Path, entropy_encode: bool = False) -> None:
         """Save to a directory on disk.
 
         Parameters
         ----------
         path : str or Path
             Directory path. Created if it does not exist.
+        entropy_encode : bool
+            If True, apply Huffman entropy encoding to the indices for
+            additional lossless compression.
         """
         path = Path(path)
         path.mkdir(parents=True, exist_ok=True)
@@ -159,11 +173,29 @@ class CompressedVectors:
         # so outlier indices are not truncated.
         outlier_bw = self.metadata.get("outlier_bit_width")
         pack_bw = max(self.bit_width, outlier_bw) if outlier_bw else self.bit_width
-        if pack_bw < 8:
-            flat = self.indices.ravel()
-            packed = pack_indices(flat, pack_bw)
+
+        if entropy_encode:
+            # Compute symbol probabilities and build Huffman table
+            probs = compute_symbol_probabilities(self.dim, self.bit_width)
+            huffman_table = build_huffman_table(probs)
+
+            # Encode indices
+            encoded_data = huffman_encode(self.indices.ravel(), huffman_table)
+
+            # Write encoded indices as raw bytes
+            with open(path / "indices.huffman", "wb") as f:
+                f.write(encoded_data)
+
+            # Write Huffman table
+            with open(path / "huffman_table.json", "w") as f:
+                json.dump(table_to_serializable(huffman_table), f, indent=2)
         else:
-            packed = self.indices
+            if pack_bw < 8:
+                flat = self.indices.ravel()
+                packed = pack_indices(flat, pack_bw)
+            else:
+                packed = self.indices
+            np.save(path / "indices.npy", packed)
 
         # User metadata goes first so reserved keys always win
         meta = {
@@ -171,15 +203,15 @@ class CompressedVectors:
             "dim": self.dim,
             "bit_width": self.bit_width,
             "num_vectors": self.num_vectors,
-            "indices_packed": pack_bw < 8,
+            "indices_packed": pack_bw < 8 and not entropy_encode,
             "indices_pack_width": pack_bw,
             "indices_shape": list(indices_shape),
             "extra_array_names": list(self.extra_arrays.keys()),
+            "entropy_encoded": entropy_encode,
         }
         with open(path / "meta.json", "w") as f:
             json.dump(meta, f, indent=2)
 
-        np.save(path / "indices.npy", packed)
         np.save(path / "norms.npy", self.norms)
 
         for name, arr in self.extra_arrays.items():
@@ -226,15 +258,32 @@ class CompressedVectors:
         pack_bw = meta.pop("indices_pack_width", bit_width)
         indices_shape = meta.pop("indices_shape", None)
         extra_names = meta.pop("extra_array_names", [])
+        is_entropy_encoded = meta.pop("entropy_encoded", False)
 
-        raw = np.load(path / "indices.npy", mmap_mode=mmap_mode)
-        if is_packed and indices_shape is not None:
+        if is_entropy_encoded and indices_shape is not None:
+            # Load Huffman-encoded indices
+            huffman_path = path / "huffman_table.json"
+            if not huffman_path.exists():
+                raise StorageError(f"Missing huffman_table.json in {path}")
+            with open(huffman_path) as f:
+                huffman_table = table_from_serializable(json.load(f))
+
+            with open(path / "indices.huffman", "rb") as f:
+                encoded_data = f.read()
+
             n_values = int(np.prod(indices_shape))
-            # mmap arrays are read-only; make a writable copy for unpack
-            raw_arr = np.array(raw)
-            indices = unpack_indices(raw_arr, pack_bw, n_values).reshape(indices_shape)
+            indices = huffman_decode(encoded_data, huffman_table, n_values).reshape(
+                indices_shape
+            )
         else:
-            indices = np.array(raw) if mmap_mode else raw
+            raw = np.load(path / "indices.npy", mmap_mode=mmap_mode)
+            if is_packed and indices_shape is not None:
+                n_values = int(np.prod(indices_shape))
+                # mmap arrays are read-only; make a writable copy for unpack
+                raw_arr = np.array(raw)
+                indices = unpack_indices(raw_arr, pack_bw, n_values).reshape(indices_shape)
+            else:
+                indices = np.array(raw) if mmap_mode else raw
         norms = np.load(path / "norms.npy", mmap_mode=mmap_mode)
 
         extra_arrays = {}
@@ -307,7 +356,7 @@ class CompressedStore:
         """Access the underlying CompressedVectors."""
         return self._vectors
 
-    def _build_quantizer(self) -> Any:
+    def _build_quantizer(self) -> TurboQuant | QJL:
         """Reconstruct the quantizer from saved metadata."""
         meta = self._vectors.metadata
         mode = meta.get("mode", "unknown")
@@ -345,13 +394,16 @@ class CompressedStore:
         query : NDArray[np.float64]
             Query vector of shape ``(dim,)``.
         k : int
-            Number of results to return.
+            Number of results to return. If k exceeds the number of stored
+            vectors, all vectors are returned.
 
         Returns
         -------
         list[tuple[int, float]]
             Top-k ``(index, score)`` pairs sorted by descending score.
         """
+        if k <= 0:
+            raise ValueError(f"k must be positive, got {k}")
         query = np.asarray(query, dtype=np.float64)
         quantizer = self._build_quantizer()
         scores = quantizer.inner_product(query, self._vectors)
