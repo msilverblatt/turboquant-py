@@ -8,6 +8,7 @@ that converges to Gaussian N(0, 1/d).
 from __future__ import annotations
 
 import logging
+import pathlib
 from functools import lru_cache
 from typing import TYPE_CHECKING
 
@@ -16,6 +17,8 @@ from scipy.special import gammaln
 
 if TYPE_CHECKING:
     from numpy.typing import NDArray
+
+_CODEBOOKS_DIR = pathlib.Path(__file__).parent / "codebooks"
 
 __all__ = [
     "beta_pdf",
@@ -135,7 +138,11 @@ def compute_codebook(
 
 @lru_cache(maxsize=32)
 def get_codebook(dim: int, bit_width: int) -> tuple[NDArray[np.float64], NDArray[np.float64]]:
-    """Get a codebook, computing it if not cached.
+    """Get a codebook, loading from a shipped .npz file when available.
+
+    First tries to load from a precomputed .npz file in the codebooks directory.
+    Falls back to computing on-the-fly if the file does not exist (e.g. for
+    unsupported dimensions).
 
     Parameters
     ----------
@@ -151,6 +158,11 @@ def get_codebook(dim: int, bit_width: int) -> tuple[NDArray[np.float64], NDArray
     boundaries : NDArray[np.float64]
         Sorted boundary values.
     """
+    npz_path = _CODEBOOKS_DIR / f"codebook_dim{dim}_bw{bit_width}.npz"
+    if npz_path.exists():
+        data = np.load(npz_path)
+        return data["centroids"], data["boundaries"]
+    logger.debug("No shipped codebook for dim=%d bw=%d; computing on-the-fly.", dim, bit_width)
     return compute_codebook(dim, bit_width)
 
 
