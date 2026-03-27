@@ -5,7 +5,7 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from turboquant.storage import CompressedVectors
+from turboquant.storage import CompressedStore, CompressedVectors
 
 
 class TestCompressedVectors:
@@ -79,3 +79,35 @@ class TestCompressedVectors:
         np.testing.assert_array_equal(
             loaded.extra_arrays["qjl_signs"], cv.extra_arrays["qjl_signs"]
         )
+
+
+class TestCompressedStoreSearch:
+    def test_search_returns_top_k(self, tmp_path: Path) -> None:
+        from turboquant.turboquant import TurboQuant
+
+        dim = 64
+        n = 50
+        rng = np.random.default_rng(42)
+        vectors = rng.standard_normal((n, dim))
+
+        tq = TurboQuant(dim=dim, bit_width=3, mode="mse", seed=42)
+        compressed = tq.quantize(vectors)
+        compressed.save(tmp_path / "store")
+
+        store = CompressedStore.load(tmp_path / "store")
+        assert store.dim == dim
+        assert store.num_vectors == n
+
+    def test_store_metadata(self, tmp_path: Path) -> None:
+        from turboquant.turboquant import TurboQuant
+
+        dim = 64
+        tq = TurboQuant(dim=dim, bit_width=2, mode="mse", seed=42)
+        rng = np.random.default_rng(42)
+        vectors = rng.standard_normal((20, dim))
+        compressed = tq.quantize(vectors)
+        compressed.save(tmp_path / "store")
+
+        store = CompressedStore.load(tmp_path / "store")
+        assert store.bit_width == 2
+        assert store.mode == "mse"

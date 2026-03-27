@@ -3,8 +3,8 @@
 import numpy as np
 import pytest
 
-from turboquant.qjl import QJL
 from turboquant.exceptions import DimensionMismatchError
+from turboquant.qjl import QJL
 
 
 class TestQJLConstruction:

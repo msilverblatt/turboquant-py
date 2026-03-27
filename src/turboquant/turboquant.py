@@ -9,6 +9,7 @@ Implements two quantization modes:
 from __future__ import annotations
 
 import logging
+from pathlib import Path
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -24,6 +25,8 @@ from turboquant.exceptions import DimensionMismatchError, InvalidBitWidthError, 
 from turboquant.storage import CompressedVectors
 
 if TYPE_CHECKING:
+    from collections.abc import Iterable
+
     from numpy.typing import NDArray
 
 __all__ = ["TurboQuant"]
@@ -290,3 +293,39 @@ class TurboQuant:
         qjl_scores = compressed.norms * residual_norms * scale * dot_products
 
         return mse_scores + qjl_scores
+
+    def quantize_batched(
+        self,
+        vectors: Iterable[NDArray[np.float64]],
+        batch_size: int = 10_000,
+        output_path: str | Path = "index.tqz",
+    ) -> None:
+        """Quantize vectors in batches, writing progressively to disk.
+
+        Parameters
+        ----------
+        vectors : Iterable[NDArray[np.float64]]
+            Iterator yielding batches of vectors, each of shape (batch_n, dim).
+        batch_size : int
+            Not used when vectors is an iterator of pre-batched arrays.
+            Included for API compatibility.
+        output_path : str or Path
+            Directory path for the output store.
+        """
+        output_path = Path(output_path)
+        parts: list[CompressedVectors] = []
+
+        for batch in vectors:
+            compressed = self.quantize(batch)
+            parts.append(compressed)
+
+        if not parts:
+            raise ValueError("No vectors provided to quantize_batched")
+
+        merged = CompressedVectors.concatenate(parts)
+        merged.save(output_path)
+        logger.info(
+            "Batched quantization complete: %d vectors saved to %s",
+            merged.num_vectors,
+            output_path,
+        )
