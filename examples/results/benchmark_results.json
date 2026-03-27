@@ -1,0 +1,302 @@
+[
+  {
+    "name": "QJL(1-bit)",
+    "dim": 384,
+    "n_vectors": 1000,
+    "bit_width": 1,
+    "quantize_time_s": 0.005011541012208909,
+    "search_time_s": 0.00034014160046353937,
+    "memory_bytes": 1955648,
+    "mse": null
+  },
+  {
+    "name": "QJL(1-bit)",
+    "dim": 384,
+    "n_vectors": 10000,
+    "bit_width": 1,
+    "quantize_time_s": 0.04824404099781532,
+    "search_time_s": 0.004011762500158511,
+    "memory_bytes": 8939648,
+    "mse": null
+  },
+  {
+    "name": "QJL(1-bit)",
+    "dim": 768,
+    "n_vectors": 1000,
+    "bit_width": 1,
+    "quantize_time_s": 0.011684833007166162,
+    "search_time_s": 0.0005915750007261522,
+    "memory_bytes": 6262592,
+    "mse": null
+  },
+  {
+    "name": "QJL(1-bit)",
+    "dim": 768,
+    "n_vectors": 10000,
+    "bit_width": 1,
+    "quantize_time_s": 0.11708620798890479,
+    "search_time_s": 0.009338620799826457,
+    "memory_bytes": 20158592,
+    "mse": null
+  },
+  {
+    "name": "QJL(1-bit)",
+    "dim": 1536,
+    "n_vectors": 1000,
+    "bit_width": 1,
+    "quantize_time_s": 0.028792416997021064,
+    "search_time_s": 0.0017058416997315362,
+    "memory_bytes": 21954368,
+    "mse": null
+  },
+  {
+    "name": "QJL(1-bit)",
+    "dim": 1536,
+    "n_vectors": 10000,
+    "bit_width": 1,
+    "quantize_time_s": 0.30657075000635814,
+    "search_time_s": 0.01940372500102967,
+    "memory_bytes": 49674368,
+    "mse": null
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 384,
+    "n_vectors": 1000,
+    "bit_width": 2,
+    "quantize_time_s": 0.018400832996121608,
+    "search_time_s": 0.003091149999818299,
+    "memory_bytes": 392000,
+    "mse": 0.11738235914121667
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 384,
+    "n_vectors": 1000,
+    "bit_width": 3,
+    "quantize_time_s": 0.02615700000023935,
+    "search_time_s": 0.002955804200610146,
+    "memory_bytes": 392000,
+    "mse": 0.03433662640898206
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 384,
+    "n_vectors": 1000,
+    "bit_width": 4,
+    "quantize_time_s": 0.07142749999184161,
+    "search_time_s": 0.0031402749998960646,
+    "memory_bytes": 392000,
+    "mse": 0.009401450348406348
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 384,
+    "n_vectors": 10000,
+    "bit_width": 2,
+    "quantize_time_s": 0.11616662499727681,
+    "search_time_s": 0.03207057079998776,
+    "memory_bytes": 3920000,
+    "mse": 0.11738235914121667
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 384,
+    "n_vectors": 10000,
+    "bit_width": 3,
+    "quantize_time_s": 0.13082641699293163,
+    "search_time_s": 0.032887495799514,
+    "memory_bytes": 3920000,
+    "mse": 0.03433662640898206
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 384,
+    "n_vectors": 10000,
+    "bit_width": 4,
+    "quantize_time_s": 0.15064574999269098,
+    "search_time_s": 0.03352963749930495,
+    "memory_bytes": 3920000,
+    "mse": 0.009401450348406348
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 768,
+    "n_vectors": 1000,
+    "bit_width": 2,
+    "quantize_time_s": 0.02417420801066328,
+    "search_time_s": 0.007366316698607989,
+    "memory_bytes": 776000,
+    "mse": 0.1165675789700199
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 768,
+    "n_vectors": 1000,
+    "bit_width": 3,
+    "quantize_time_s": 0.04254037501232233,
+    "search_time_s": 0.008050945801369381,
+    "memory_bytes": 776000,
+    "mse": 0.03444666517956821
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 768,
+    "n_vectors": 1000,
+    "bit_width": 4,
+    "quantize_time_s": 0.08028783299960196,
+    "search_time_s": 0.00794189999869559,
+    "memory_bytes": 776000,
+    "mse": 0.009527213175650574
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 768,
+    "n_vectors": 10000,
+    "bit_width": 2,
+    "quantize_time_s": 0.2152072919998318,
+    "search_time_s": 0.07586364169983426,
+    "memory_bytes": 7760000,
+    "mse": 0.1165675789700199
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 768,
+    "n_vectors": 10000,
+    "bit_width": 3,
+    "quantize_time_s": 0.24671712500276044,
+    "search_time_s": 0.08217793329968118,
+    "memory_bytes": 7760000,
+    "mse": 0.03444666517956821
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 768,
+    "n_vectors": 10000,
+    "bit_width": 4,
+    "quantize_time_s": 0.2891765420063166,
+    "search_time_s": 0.07859844169870485,
+    "memory_bytes": 7760000,
+    "mse": 0.009527213175650574
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 1536,
+    "n_vectors": 1000,
+    "bit_width": 2,
+    "quantize_time_s": 0.047827165995840915,
+    "search_time_s": 0.0240941334006493,
+    "memory_bytes": 1544000,
+    "mse": 0.11764485798530246
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 1536,
+    "n_vectors": 1000,
+    "bit_width": 3,
+    "quantize_time_s": 0.06701412500115111,
+    "search_time_s": 0.024046295799780636,
+    "memory_bytes": 1544000,
+    "mse": 0.0344927747569146
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 1536,
+    "n_vectors": 1000,
+    "bit_width": 4,
+    "quantize_time_s": 0.11053508300392423,
+    "search_time_s": 0.0291008750005858,
+    "memory_bytes": 1544000,
+    "mse": 0.009639088851040405
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 1536,
+    "n_vectors": 10000,
+    "bit_width": 2,
+    "quantize_time_s": 0.6251638749963604,
+    "search_time_s": 0.24281128330039792,
+    "memory_bytes": 15440000,
+    "mse": 0.11764485798530246
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 1536,
+    "n_vectors": 10000,
+    "bit_width": 3,
+    "quantize_time_s": 0.4977785000082804,
+    "search_time_s": 0.22625877080135978,
+    "memory_bytes": 15440000,
+    "mse": 0.0344927747569146
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 1536,
+    "n_vectors": 10000,
+    "bit_width": 4,
+    "quantize_time_s": 0.5603069579956355,
+    "search_time_s": 0.22354419580078683,
+    "memory_bytes": 15440000,
+    "mse": 0.009639088851040405
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 3072,
+    "n_vectors": 1000,
+    "bit_width": 2,
+    "quantize_time_s": 0.11253466599737294,
+    "search_time_s": 0.06995923749927897,
+    "memory_bytes": 3080000,
+    "mse": 0.11739244024927356
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 3072,
+    "n_vectors": 1000,
+    "bit_width": 3,
+    "quantize_time_s": 0.12810929199622478,
+    "search_time_s": 0.06985025419999147,
+    "memory_bytes": 3080000,
+    "mse": 0.03461546550520108
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 3072,
+    "n_vectors": 1000,
+    "bit_width": 4,
+    "quantize_time_s": 0.18459912500111386,
+    "search_time_s": 0.06974039580090903,
+    "memory_bytes": 3080000,
+    "mse": 0.009986884887404618
+  },
+  {
+    "name": "TurboQuant(mse,bw=2)",
+    "dim": 3072,
+    "n_vectors": 10000,
+    "bit_width": 2,
+    "quantize_time_s": 1.1821605419972911,
+    "search_time_s": 0.7566178499997477,
+    "memory_bytes": 30800000,
+    "mse": 0.11739244024927356
+  },
+  {
+    "name": "TurboQuant(mse,bw=3)",
+    "dim": 3072,
+    "n_vectors": 10000,
+    "bit_width": 3,
+    "quantize_time_s": 1.2703375419951044,
+    "search_time_s": 0.793827825000335,
+    "memory_bytes": 30800000,
+    "mse": 0.03461546550520108
+  },
+  {
+    "name": "TurboQuant(mse,bw=4)",
+    "dim": 3072,
+    "n_vectors": 10000,
+    "bit_width": 4,
+    "quantize_time_s": 1.5075709160009865,
+    "search_time_s": 0.7451513250009156,
+    "memory_bytes": 30800000,
+    "mse": 0.009986884887404618
+  }
+]

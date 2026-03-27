@@ -9,8 +9,10 @@ Compares NumPy vs PyTorch when available.
 
 from __future__ import annotations
 
+import json
+import pathlib
 import time
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 
 import numpy as np
 
@@ -63,7 +65,7 @@ def estimate_memory(compressed: object) -> int:
 def run_turboquant_benchmarks() -> list[BenchmarkResult]:
     results = []
     dims = [384, 768, 1536, 3072]
-    n_vectors_list = [1_000, 10_000, 100_000]
+    n_vectors_list = [1_000, 10_000]
     bit_widths = [2, 3, 4]
 
     for dim in dims:
@@ -144,6 +146,17 @@ def run_qjl_benchmarks() -> list[BenchmarkResult]:
     return results
 
 
+def save_results(
+    results: list[BenchmarkResult],
+    path: str | pathlib.Path = "examples/results/benchmark_results.json",
+) -> None:
+    out = pathlib.Path(path)
+    out.parent.mkdir(parents=True, exist_ok=True)
+    with out.open("w") as f:
+        json.dump([asdict(r) for r in results], f, indent=2)
+    print(f"Results saved to {out}")
+
+
 def main() -> None:
     print("=" * 80)
     print("TurboQuant Benchmarks")
@@ -152,15 +165,18 @@ def main() -> None:
     print()
 
     print("--- QJL Benchmarks ---")
-    run_qjl_benchmarks()
+    qjl_results = run_qjl_benchmarks()
     print()
 
     print("--- TurboQuant Benchmarks ---")
-    run_turboquant_benchmarks()
+    tq_results = run_turboquant_benchmarks()
     print()
 
     print("=" * 80)
     print("Done.")
+
+    all_results = qjl_results + tq_results
+    save_results(all_results)
 
 
 if __name__ == "__main__":
