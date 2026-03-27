@@ -266,17 +266,11 @@ class TestMetadataCollision:
         compressed.save(tmp_path / "dim_collision")
         loaded = CompressedVectors.load(tmp_path / "dim_collision")
 
-        # BUG DETECTION: if user metadata "dim" overrides internal dim,
-        # loaded.dim will be 999 instead of 64.
-        # This test documents the current behavior.
-        # The loaded dim should ideally be the original 64, not 999.
-        # If this assertion fails with loaded.dim == 64, the bug is fixed.
-        # If it passes, the bug exists: user metadata can corrupt internal state.
-        assert loaded.dim in (dim, 999), f"Unexpected dim value {loaded.dim}"
-        # Verify we can still reconstruct -- if dim was clobbered this may fail
-        if loaded.dim == dim:
-            reconstructed = tq.dequantize(loaded)
-            assert reconstructed.shape == (10, dim)
+        # Internal keys are written after user metadata in save(), so they win.
+        # User metadata "dim"=999 must not override the real dim.
+        assert loaded.dim == dim, f"Internal dim was corrupted: expected {dim}, got {loaded.dim}"
+        reconstructed = tq.dequantize(loaded)
+        assert reconstructed.shape == (10, dim)
 
     def test_user_metadata_seed_collision(self, tmp_path: Path) -> None:
         """User metadata 'seed' should not corrupt internal seed after load."""
